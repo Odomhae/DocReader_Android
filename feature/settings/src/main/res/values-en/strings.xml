@@ -1,0 +1,7 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_licenses">Open-source licenses</string>
+    <string name="settings_licenses_summary">Open-source software and fonts included in this app</string>
+    <string name="settings_version">Version</string>
+</resources>

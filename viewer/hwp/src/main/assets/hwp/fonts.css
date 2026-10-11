@@ -1,0 +1,14 @@
+/*
+ * Font substitution for HWP documents. See docs/font-mapping.md for the table this implements.
+ *
+ * rhwp writes a fallback chain into every text run (document font first, then open-source
+ * equivalents, then serif / sans-serif). Android has a Korean sans-serif built in but, before
+ * API 28, no Korean serif, so a serif face is bundled and registered under each serif name that
+ * appears in those chains. Sans-serif chains need nothing here: they end in the system font.
+ */
+@font-face { font-family: 'Nanum Myeongjo'; font-weight: 400; src: url('fonts/NanumMyeongjo-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Nanum Myeongjo'; font-weight: 700; src: url('fonts/NanumMyeongjo-Bold.ttf') format('truetype'); }
+@font-face { font-family: '나눔명조'; font-weight: 400; src: url('fonts/NanumMyeongjo-Regular.ttf') format('truetype'); }
+@font-face { font-family: '나눔명조'; font-weight: 700; src: url('fonts/NanumMyeongjo-Bold.ttf') format('truetype'); }
+@font-face { font-family: 'Noto Serif KR'; font-weight: 400; src: url('fonts/NanumMyeongjo-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Noto Serif KR'; font-weight: 700; src: url('fonts/NanumMyeongjo-Bold.ttf') format('truetype'); }

@@ -1,0 +1,11 @@
+<resources>
+    <string name="pdf_back">Back</string>
+    <string name="pdf_search">Search in document</string>
+    <string name="pdf_share">Share</string>
+    <string name="pdf_error_title">Can\'t open this PDF</string>
+    <string name="pdf_error_password_required">This document is password protected. Enter its password to open it.</string>
+    <string name="pdf_error_password_unsupported">This document is password protected. Password-protected PDFs can\'t be opened on this device.</string>
+    <string name="pdf_error_unreadable">The file is damaged or is not a PDF.</string>
+    <string name="pdf_page_description">Page %1$d</string>
+    <string name="pdf_page_unavailable">Page %1$d can\'t be displayed.</string>
+</resources>

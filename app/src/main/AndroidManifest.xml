@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- androidx.pdf needs API 28; :viewer:pdf falls back to its own viewer below that. -->
+    <uses-sdk tools:overrideLibrary="androidx.pdf, androidx.pdf.core, androidx.pdf.document.service, androidx.pdf.viewer.fragment" />
+
+    <application
+        android:name=".DocReaderApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DocReader">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DocReader">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- "Open with" for senders that report a document MIME type. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content" />
+                <data android:mimeType="application/pdf" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <data android:mimeType="application/x-hwp" />
+                <data android:mimeType="application/haansofthwp" />
+                <data android:mimeType="application/vnd.hancom.hwp" />
+                <data android:mimeType="application/hwp+zip" />
+                <data android:mimeType="application/haansofthwpx" />
+                <data android:mimeType="application/vnd.hancom.hwpx" />
+            </intent-filter>
+
+            <!-- Senders that only know a generic type (HWP often arrives as application/octet-stream):
+                 matched by file extension in the Uri path. The format is verified again when opened. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.pdf" />
+                <data android:pathPattern=".*\\..*\\.pdf" />
+                <data android:pathPattern=".*\\..*\\..*\\.pdf" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.pdf" />
+                <data android:pathPattern=".*\\.PDF" />
+                <data android:pathPattern=".*\\..*\\.PDF" />
+                <data android:pathPattern=".*\\..*\\..*\\.PDF" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.PDF" />
+                <data android:pathPattern=".*\\.docx" />
+                <data android:pathPattern=".*\\..*\\.docx" />
+                <data android:pathPattern=".*\\..*\\..*\\.docx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.docx" />
+                <data android:pathPattern=".*\\.DOCX" />
+                <data android:pathPattern=".*\\..*\\.DOCX" />
+                <data android:pathPattern=".*\\..*\\..*\\.DOCX" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.DOCX" />
+                <data android:pathPattern=".*\\.hwp" />
+                <data android:pathPattern=".*\\..*\\.hwp" />
+                <data android:pathPattern=".*\\..*\\..*\\.hwp" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.hwp" />
+                <data android:pathPattern=".*\\.HWP" />
+                <data android:pathPattern=".*\\..*\\.HWP" />
+                <data android:pathPattern=".*\\..*\\..*\\.HWP" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.HWP" />
+                <data android:pathPattern=".*\\.hwpx" />
+                <data android:pathPattern=".*\\..*\\.hwpx" />
+                <data android:pathPattern=".*\\..*\\..*\\.hwpx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.hwpx" />
+                <data android:pathPattern=".*\\.HWPX" />
+                <data android:pathPattern=".*\\..*\\.HWPX" />
+                <data android:pathPattern=".*\\..*\\..*\\.HWPX" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.HWPX" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="fonts.css">
+  <style>
+    body { margin: 0; background: #9e9e9e; }
+    .page { position: relative; margin: 8px; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .4); }
+    .page svg { display: block; width: 100%; height: 100%; }
+    .match { position: absolute; background: rgba(255, 213, 0, .45); pointer-events: none; }
+    .match.active { background: rgba(255, 128, 0, .6); }
+  </style>
+</head>
+<body>
+  <div id="viewer"></div>
+  <script type="module" src="viewer.js"></script>
+</body>
+</html>

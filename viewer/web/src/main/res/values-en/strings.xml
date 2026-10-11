@@ -1,0 +1,16 @@
+<resources>
+    <string name="web_back">Back</string>
+    <string name="web_search">Search in document</string>
+    <string name="web_share">Share</string>
+    <string name="web_search_hint">Find in document</string>
+    <string name="web_search_close">Close search</string>
+    <string name="web_search_previous">Previous match</string>
+    <string name="web_search_next">Next match</string>
+    <string name="web_previous_page">Previous page</string>
+    <string name="web_next_page">Next page</string>
+    <string name="web_error_title">Can\'t open this document</string>
+    <string name="web_error_render">The file is damaged or contains content that is not supported.</string>
+    <string name="web_error_renderer_crashed">Something went wrong while showing the document. It may be too large, or the device may be low on memory.</string>
+    <string name="web_error_webview_outdated">Opening this document requires Android System WebView %2$d or newer (current: %1$s). Update Android System WebView or Chrome in the Play Store and try again.</string>
+    <string name="web_open_with_other_app">Open with another app</string>
+</resources>
