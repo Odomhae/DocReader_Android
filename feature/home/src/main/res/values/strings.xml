@@ -24,6 +24,10 @@
     <string name="home_tab_pdf" translatable="false">PDF</string>
     <string name="home_tab_docx" translatable="false">DOCX</string>
     <string name="home_tab_hwp" translatable="false">HWP</string>
+    <string name="home_type_pdf" translatable="false">PDF</string>
+    <string name="home_type_docx" translatable="false">DOCX</string>
+    <string name="home_type_hwp" translatable="false">HWP</string>
+    <string name="home_type_hwpx" translatable="false">HWPX</string>
     <string name="home_document_details" translatable="false">%1$s · %2$s · %3$s</string>
     <string name="home_settings">설정</string>
 </resources>

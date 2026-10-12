@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.odom.docreader.core.model.DocumentFile
+import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.core.ui.R as UiR
 import java.text.DateFormat
 import java.util.Date
@@ -52,7 +53,7 @@ private fun DocumentRow(item: DocumentListItem, onToggleFavorite: () -> Unit, on
             Text(
                 stringResource(
                     R.string.home_document_details,
-                    item.file.type.name,
+                    stringResource(item.file.type.labelRes),
                     Formatter.formatShortFileSize(context, item.file.sizeBytes),
                     dateFormat.format(Date(item.file.lastModified)),
                 ),
@@ -76,3 +77,11 @@ private fun DocumentRow(item: DocumentListItem, onToggleFavorite: () -> Unit, on
         },
     )
 }
+
+private val DocumentType.labelRes: Int
+    get() = when (this) {
+        DocumentType.PDF -> R.string.home_type_pdf
+        DocumentType.DOCX -> R.string.home_type_docx
+        DocumentType.HWP -> R.string.home_type_hwp
+        DocumentType.HWPX -> R.string.home_type_hwpx
+    }

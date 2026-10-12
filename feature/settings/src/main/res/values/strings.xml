@@ -4,4 +4,32 @@
     <string name="settings_licenses">오픈소스 라이선스</string>
     <string name="settings_licenses_summary">이 앱에 포함된 오픈소스 소프트웨어와 폰트</string>
     <string name="settings_version">버전</string>
+    <!-- Open-source list. Product names, license names and copyright notices are shown as published. -->
+    <string name="settings_library_details" translatable="false">%1$s\n%2$s</string>
+    <string name="settings_license_apache_2" translatable="false">Apache License 2.0</string>
+    <string name="settings_license_mit" translatable="false">MIT License</string>
+    <string name="settings_license_ofl" translatable="false">SIL Open Font License 1.1</string>
+    <string name="settings_license_rhwp_crates">MIT / Apache-2.0 / BSD 및 호환 라이선스</string>
+    <string name="settings_library_rhwp" translatable="false">rhwp (@rhwp/core 0.8.7)</string>
+    <string name="settings_copyright_rhwp" translatable="false">Copyright (c) 2025-2026 Edward Kim</string>
+    <string name="settings_library_rhwp_crates">rhwp — 포함된 Rust 크레이트</string>
+    <string name="settings_copyright_rhwp_crates">크레이트별 목록 참조</string>
+    <string name="settings_library_docx_preview" translatable="false">docx-preview 0.4.1</string>
+    <string name="settings_copyright_docx_preview" translatable="false">Copyright Volodymyr Baydalka</string>
+    <string name="settings_library_jszip" translatable="false">JSZip 3.10.2</string>
+    <string name="settings_copyright_jszip" translatable="false">Copyright (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso</string>
+    <string name="settings_library_nanum_myeongjo" translatable="false">Nanum Myeongjo (나눔명조)</string>
+    <string name="settings_copyright_nanum_myeongjo" translatable="false">Copyright (c) 2010, NHN Corporation</string>
+    <string name="settings_library_androidx" translatable="false">AndroidX (Core, Activity, Compose, Lifecycle, Navigation, Fragment, Room, DataStore, Hilt, WebKit, PDF)</string>
+    <string name="settings_copyright_androidx" translatable="false">Copyright The Android Open Source Project</string>
+    <string name="settings_library_material" translatable="false">Material Components for Android, Material Icons</string>
+    <string name="settings_copyright_material" translatable="false">Copyright Google LLC</string>
+    <string name="settings_library_dagger" translatable="false">Dagger, Hilt</string>
+    <string name="settings_copyright_dagger" translatable="false">Copyright The Dagger Authors</string>
+    <string name="settings_library_kotlin" translatable="false">Kotlin standard library, kotlinx.coroutines, kotlinx.serialization, JetBrains annotations</string>
+    <string name="settings_copyright_kotlin" translatable="false">Copyright JetBrains s.r.o. and Kotlin Programming Language contributors</string>
+    <string name="settings_library_okio" translatable="false">Okio</string>
+    <string name="settings_copyright_okio" translatable="false">Copyright Square, Inc.</string>
+    <string name="settings_library_java_annotations" translatable="false">Guava ListenableFuture, Error Prone annotations, JSR-305, JSpecify, javax.inject, jakarta.inject</string>
+    <string name="settings_copyright_java_annotations" translatable="false">Copyright their respective authors</string>
 </resources>

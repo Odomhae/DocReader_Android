@@ -34,10 +34,15 @@ class OpenSourceLibrariesTest {
 
     @Test
     fun onlyAllowedLicensesAreUsed() {
-        val forbidden = OPEN_SOURCE_LIBRARIES.filter { library ->
-            Regex("\\bA?GPL\\b").containsMatchIn(library.license)
+        // License names are string resources, which a JVM test can only read from the XML.
+        val licenseNames = listOf("values", "values-en").flatMap { qualifier ->
+            Regex("<string name=\"settings_license_\\w+\"[^>]*>([^<]*)</string>")
+                .findAll(File("src/main/res/$qualifier/strings.xml").readText())
+                .map { it.groupValues[1] }
         }
+        val forbidden = licenseNames.filter { Regex("\\bA?GPL\\b").containsMatchIn(it) }
 
+        assertTrue("no license names found", licenseNames.isNotEmpty())
         assertTrue("GPL-licensed entries: $forbidden", forbidden.isEmpty())
     }
 }

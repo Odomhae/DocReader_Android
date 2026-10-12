@@ -50,7 +50,7 @@ fun LicensesScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = opened?.library?.name ?: stringResource(R.string.settings_licenses),
+                        text = stringResource(opened?.library?.name ?: R.string.settings_licenses),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -85,8 +85,16 @@ private fun LibraryList(
         items(libraries, key = { it.name }) { library ->
             ListItem(
                 modifier = Modifier.clickable { onLibrarySelected(library) },
-                headlineContent = { Text(library.name) },
-                supportingContent = { Text(library.license + "\n" + library.copyright) },
+                headlineContent = { Text(stringResource(library.name)) },
+                supportingContent = {
+                    Text(
+                        stringResource(
+                            R.string.settings_library_details,
+                            stringResource(library.license),
+                            stringResource(library.copyright),
+                        ),
+                    )
+                },
             )
             HorizontalDivider()
         }

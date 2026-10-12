@@ -1,18 +1,19 @@
 package com.odom.docreader.feature.settings
 
+import androidx.annotation.StringRes
+
 /**
  * One row of the open-source licenses screen.
  *
  * @param licenseAsset file under `assets/licenses/` holding the full text shown when the row is opened
  */
 data class OpenSourceLibrary(
-    val name: String,
-    val license: String,
-    val copyright: String,
+    @param:StringRes val name: Int,
+    @param:StringRes val license: Int,
+    @param:StringRes val copyright: Int,
     val licenseAsset: String,
 )
 
-private const val APACHE_2 = "Apache License 2.0"
 private const val APACHE_2_ASSET = "Apache-2.0.txt"
 
 /**
@@ -22,69 +23,69 @@ private const val APACHE_2_ASSET = "Apache-2.0.txt"
  */
 internal val OPEN_SOURCE_LIBRARIES = listOf(
     OpenSourceLibrary(
-        name = "rhwp (@rhwp/core 0.8.7)",
-        license = "MIT License",
-        copyright = "Copyright (c) 2025-2026 Edward Kim",
+        name = R.string.settings_library_rhwp,
+        license = R.string.settings_license_mit,
+        copyright = R.string.settings_copyright_rhwp,
         licenseAsset = "rhwp-MIT.txt",
     ),
     OpenSourceLibrary(
-        name = "rhwp — bundled Rust crates",
-        license = "MIT / Apache-2.0 / BSD and compatible",
-        copyright = "See the list for each crate",
+        name = R.string.settings_library_rhwp_crates,
+        license = R.string.settings_license_rhwp_crates,
+        copyright = R.string.settings_copyright_rhwp_crates,
         licenseAsset = "rhwp-THIRD_PARTY_LICENSES.md",
     ),
     OpenSourceLibrary(
-        name = "docx-preview 0.4.1",
-        license = APACHE_2,
-        copyright = "Copyright Volodymyr Baydalka",
+        name = R.string.settings_library_docx_preview,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_docx_preview,
         licenseAsset = APACHE_2_ASSET,
     ),
     OpenSourceLibrary(
-        name = "JSZip 3.10.2",
-        license = "MIT License",
-        copyright = "Copyright (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso",
+        name = R.string.settings_library_jszip,
+        license = R.string.settings_license_mit,
+        copyright = R.string.settings_copyright_jszip,
         licenseAsset = "jszip-MIT.txt",
     ),
     OpenSourceLibrary(
-        name = "Nanum Myeongjo (나눔명조)",
-        license = "SIL Open Font License 1.1",
-        copyright = "Copyright (c) 2010, NHN Corporation",
+        name = R.string.settings_library_nanum_myeongjo,
+        license = R.string.settings_license_ofl,
+        copyright = R.string.settings_copyright_nanum_myeongjo,
         licenseAsset = "NanumMyeongjo-OFL.txt",
     ),
     OpenSourceLibrary(
-        name = "AndroidX (Core, Activity, Compose, Lifecycle, Navigation, Fragment, Room, DataStore, Hilt, WebKit, PDF)",
-        license = APACHE_2,
-        copyright = "Copyright The Android Open Source Project",
+        name = R.string.settings_library_androidx,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_androidx,
         licenseAsset = APACHE_2_ASSET,
     ),
     OpenSourceLibrary(
-        name = "Material Components for Android, Material Icons",
-        license = APACHE_2,
-        copyright = "Copyright Google LLC",
+        name = R.string.settings_library_material,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_material,
         licenseAsset = APACHE_2_ASSET,
     ),
     OpenSourceLibrary(
-        name = "Dagger, Hilt",
-        license = APACHE_2,
-        copyright = "Copyright The Dagger Authors",
+        name = R.string.settings_library_dagger,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_dagger,
         licenseAsset = APACHE_2_ASSET,
     ),
     OpenSourceLibrary(
-        name = "Kotlin standard library, kotlinx.coroutines, kotlinx.serialization, JetBrains annotations",
-        license = APACHE_2,
-        copyright = "Copyright JetBrains s.r.o. and Kotlin Programming Language contributors",
+        name = R.string.settings_library_kotlin,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_kotlin,
         licenseAsset = APACHE_2_ASSET,
     ),
     OpenSourceLibrary(
-        name = "Okio",
-        license = APACHE_2,
-        copyright = "Copyright Square, Inc.",
+        name = R.string.settings_library_okio,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_okio,
         licenseAsset = APACHE_2_ASSET,
     ),
     OpenSourceLibrary(
-        name = "Guava ListenableFuture, Error Prone annotations, JSR-305, JSpecify, javax.inject, jakarta.inject",
-        license = APACHE_2,
-        copyright = "Copyright their respective authors",
+        name = R.string.settings_library_java_annotations,
+        license = R.string.settings_license_apache_2,
+        copyright = R.string.settings_copyright_java_annotations,
         licenseAsset = APACHE_2_ASSET,
     ),
 )
