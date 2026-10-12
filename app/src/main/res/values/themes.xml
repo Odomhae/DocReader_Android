@@ -2,5 +2,5 @@
 <resources>
 
     <!-- Material3 parent because androidx.pdf's views (search bar, password dialog) need it. -->
-    <style name="Theme.DocReader" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.DocReader" parent="Theme.Material3.Light.NoActionBar" />
 </resources>
