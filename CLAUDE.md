@@ -2,21 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What this is
+## 이 프로젝트는
 
-DocReader (`com.odom.docreader`) is a view-only Android document viewer for PDF, DOCX, HWP and HWPX, targeting a Google Play release. It works fully offline: documents never leave the device and the app has no `INTERNET` permission.
+DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX를 보기만 하는 Android 문서 뷰어이고 Google Play 출시가 목표다. 완전히 오프라인으로 동작한다. 문서는 기기 밖으로 나가지 않으며 앱에 `INTERNET` 권한이 없다.
 
-`Guide.md` (Korean) is the authoritative project brief: product scope, exclusions, design decisions, milestones M0–M7 and code rules. Read it before any non-trivial change. All milestones are implemented; remaining work is release hardening and real-device testing (`docs/release.md` lists what is still unverified).
+`Guide.md`가 프로젝트의 기준 문서다. 제품 범위, 제외 항목, 설계 결정, 마일스톤 M0–M7, 코드 규칙이 들어 있으니 사소하지 않은 변경 전에는 먼저 읽는다. 마일스톤은 모두 구현됐고, 남은 일은 출시 준비와 실기기 검증이다 (`docs/release.md`에 아직 확인하지 못한 항목이 정리돼 있다).
 
-## Commands
+## 명령어
 
-Gradle needs JDK 21. On this machine the `java` on PATH is 1.8 and `Android Studio/jbr` is broken, so set this first:
+Gradle은 JDK 21이 필요하다. 이 PC는 PATH의 `java`가 1.8이므로 먼저 설정한다.
 
 ```bash
 export JAVA_HOME="C:/Program Files/Android/Android Studio2/jbr"
 ```
 
-Run all three before reporting work as done (Guide.md §7):
+작업을 마쳤다고 보고하기 전에 세 가지를 모두 실행한다 (Guide.md §7).
 
 ```bash
 ./gradlew assembleDebug
@@ -24,7 +24,7 @@ Run all three before reporting work as done (Guide.md §7):
 ./gradlew lintDebug
 ```
 
-Single module / class / method:
+모듈 / 클래스 / 메서드 하나만 실행:
 
 ```bash
 ./gradlew :viewer:web:testDebugUnitTest
@@ -32,106 +32,122 @@ Single module / class / method:
 ./gradlew :viewer:web:testDebugUnitTest --tests "*.WebViewerViewModelTest.someMethod"
 ```
 
-`:core:model` is a pure Kotlin/JVM module, so its task is `:core:model:test`, not `testDebugUnitTest` (it has no tests yet). `:viewer:hwp` and `:viewer:docx` have no tests either; their logic lives in JS assets and is only exercised on an emulator.
+`:core:model`은 순수 Kotlin/JVM 모듈이라 태스크가 `testDebugUnitTest`가 아니라 `:core:model:test`다 (테스트는 아직 없다). `:viewer:hwp`, `:viewer:docx`, `:core:ui`도 테스트가 없다. 두 뷰어 모듈의 로직은 JS assets에 있어서 에뮬레이터에서만 확인할 수 있다. `MediaStoreDocumentScanner`도 실제 `MediaStore`가 필요해 단위 테스트가 없다.
 
-Instrumented tests (only `:viewer:web` has real ones — network blocking and large-file streaming):
+계측 테스트는 `:viewer:web`에만 의미 있는 것이 있다 (네트워크 차단, 대용량 파일 스트리밍).
 
 ```bash
 ANDROID_SERIAL=emulator-5554 ./gradlew :viewer:web:connectedDebugAndroidTest
 ```
 
-Always set `ANDROID_SERIAL` to an emulator for `connected*`/`install*` tasks. Real phones are attached over wireless adb and Gradle will otherwise install on them too.
+`connected*`, `install*` 태스크는 반드시 `ANDROID_SERIAL`을 에뮬레이터로 지정한다. 실제 폰이 무선 adb로 연결돼 있으면 Gradle이 거기에도 설치한다.
 
-Release: `./gradlew assembleRelease` (APK) or `bundleRelease` (AAB). R8 and resource shrinking are on. Signing is read from a git-ignored `keystore.properties` (template: `keystore.properties.example`); without it the build succeeds but produces `app-release-unsigned.apk`.
+릴리스: `./gradlew assembleRelease`(APK) 또는 `bundleRelease`(AAB). R8과 리소스 축소가 켜져 있다. 서명 정보는 git에서 제외된 `keystore.properties`에서 읽는다 (양식: `keystore.properties.example`). 파일이 없어도 빌드는 성공하지만 `app-release-unsigned.apk`가 나온다.
 
-Sample documents live in `samples/`. Only self-made or openly licensed documents may go there. They are regenerated with:
+샘플 문서는 `samples/`에 있다. 직접 만든 문서나 공개 라이선스 문서만 넣을 수 있다. 다시 만들려면:
 
 ```bash
-node samples/make-samples.mjs viewer/hwp/src/main/assets/hwp/rhwp samples   # HWP/HWPX, uses the bundled rhwp
-python samples/make-office-samples.py samples                                # DOCX/PDF, needs pypdf
+node samples/make-samples.mjs viewer/hwp/src/main/assets/hwp/rhwp samples   # HWP/HWPX, 번들된 rhwp 사용
+python samples/make-office-samples.py samples                                # DOCX/PDF, pypdf 필요
 ```
 
-`sample-password.pdf` opens with the password `docreader`; the `sample-corrupt.*` files exist to exercise the error state.
+`sample-password.pdf`의 암호는 `docreader`다. `sample-corrupt.*`는 오류 화면을 확인하기 위한 파일이다.
 
-## Architecture
+## 아키텍처
 
-### Modules
+### 모듈
 
 ```
-:app                 entry point, nav graph, ACTION_VIEW intent handling
-:core:model          DocumentFile, DocumentType, SortOrder (pure JVM)
-:core:data           Room (recent/favourites), DataStore (settings), repositories
-:core:files          storage access, scanning, format detection, share / open-with
-:core:ui             theme, shared composables and icons
-:feature:home        file list, tabs, search, sort
-:feature:settings    settings, open-source licences screen
-:viewer:pdf          PDF viewer
-:viewer:web          format-agnostic WebView host + JS bridge
-:viewer:hwp          rhwp bundle + HWP/HWPX viewer page
-:viewer:docx         docx-preview bundle + DOCX viewer page
+:app                 진입점, 내비게이션 그래프, ACTION_VIEW 인텐트 처리
+:core:model          DocumentFile, DocumentType, SortOrder (순수 JVM)
+:core:data           Room(최근/즐겨찾기), DataStore(설정), 리포지토리
+:core:files          저장소 접근 권한, 파일 스캔, 포맷 판별, 공유 / 다른 앱으로 열기
+:core:ui             테마, 공용 Composable과 아이콘
+:feature:home        파일 목록, 탭, 검색, 정렬
+:feature:settings    설정, 오픈소스 라이선스 화면
+:viewer:pdf          PDF 뷰어
+:viewer:web          포맷을 모르는 WebView 호스트 + JS 브리지
+:viewer:hwp          rhwp 번들 + HWP/HWPX 뷰어 페이지
+:viewer:docx         docx-preview 번들 + DOCX 뷰어 페이지
 ```
 
-Dependency direction is `app → feature / viewer → core`. Feature and viewer modules never depend on each other; the one exception is `:viewer:hwp` and `:viewer:docx` depending on `:viewer:web`.
+의존 방향은 `app → feature / viewer → core`다. feature와 viewer 모듈끼리는 서로 의존하지 않는다. 예외는 `:viewer:hwp`와 `:viewer:docx`가 `:viewer:web`에 의존하는 것 하나뿐이다.
 
-Versions are all in `gradle/libs.versions.toml`. Hilt + KSP for DI, type-safe Navigation Compose routes (`app/.../navigation/Routes.kt`). minSdk 26, targetSdk 36, compileSdk 37, Java 11 bytecode; there is no convention plugin, so these are repeated in every module's `build.gradle.kts` and must be changed in all of them.
+버전은 모두 `gradle/libs.versions.toml`에 있다. DI는 Hilt + KSP, 내비게이션은 타입 세이프 Navigation Compose 라우트(`app/.../navigation/Routes.kt`)다. minSdk 26, targetSdk 36, compileSdk 37, Java 11 바이트코드. 컨벤션 플러그인이 없어서 이 값들이 모듈마다 `build.gradle.kts`에 반복돼 있으므로 바꿀 때는 전부 바꿔야 한다.
 
-Assets from every module merge into one namespace, so each module keeps its files under its own top-level folder: `webhost/` (`:viewer:web`), `hwp/`, `docx/`, `licenses/` (`:feature:settings`). The JS engines are vendored files, not npm dependencies — there is no `package.json`. Upgrading one means replacing the files by hand and updating `docs/THIRD_PARTY.md`, the in-app licence list and the version noted below.
+모든 모듈의 assets는 하나의 네임스페이스로 합쳐진다. 그래서 모듈마다 자기 최상위 폴더 아래에만 파일을 둔다: `webhost/`(`:viewer:web`), `hwp/`, `docx/`, `licenses/`(`:feature:settings`). JS 엔진은 npm 의존성이 아니라 직접 넣은 파일이고 `package.json`은 없다. 엔진을 올리려면 파일을 손으로 교체하고 `docs/THIRD_PARTY.md`, 앱 안의 라이선스 목록, 아래에 적힌 버전을 함께 고친다.
 
-### Opening a document
+### 문서 열기
 
-Files are always `content://` Uris, never paths. Two entry points converge on one route:
+파일은 항상 `content://` Uri로 다루고 경로는 쓰지 않는다. 진입점은 둘이고 하나의 라우트로 모인다.
 
-- Home list → `ViewerRoute(uri, name, type)`. The list is every supported document on shared storage, read from `MediaStore.Files` (`MediaStoreDocumentScanner`), so its Uris are `content://media/external/file/<id>`. That needs "all files access" (`MANAGE_EXTERNAL_STORAGE`) on API 30+ and `READ_EXTERNAL_STORAGE` on API 26–29; `StorageAccess` hides the difference. There is no folder picker.
-- `ACTION_VIEW` from another app → `MainActivity` → `MainViewModel.onViewIntent` → `ExternalDocumentResolver` re-detects the real format from file name, MIME type and file signature (`DocumentTypeDetector`; HWP MIME types are unreliable) → `IncomingDocument` → `DocReaderNavHost` navigates. The document is added to recents only if the sender granted a persistable permission, since a temporary grant would be a dead entry on next launch.
+- 홈 목록 → `ViewerRoute(uri, name, type)`
+- 다른 앱의 `ACTION_VIEW` → `MainActivity` → `MainViewModel.onViewIntent` → `ExternalDocumentResolver`가 파일명, MIME 타입, 파일 시그니처로 실제 포맷을 다시 판별(`DocumentTypeDetector`. HWP는 MIME 타입을 믿을 수 없다) → `IncomingDocument` → `DocReaderNavHost`가 이동. 보낸 앱이 영구 권한을 준 경우에만 최근 문서에 넣는다. 임시 권한이면 다음 실행 때 열 수 없는 항목이 되기 때문이다.
 
-`DocReaderNavHost` dispatches `ViewerRoute` to a viewer screen by `DocumentType`. The type travels as its enum name string, and both the nav host and `RoomLibraryRepository` tolerate an unknown name (unsupported screen / skipped row) rather than crashing.
+`DocReaderNavHost`가 `DocumentType`에 따라 `ViewerRoute`를 뷰어 화면으로 보낸다. 타입은 enum 이름 문자열로 전달되고, 내비게이션 호스트와 `RoomLibraryRepository` 모두 모르는 이름을 만나면 크래시하지 않고 넘긴다 (미지원 화면 / 행 건너뛰기).
 
-### Web viewers (HWP, HWPX, DOCX)
+### 홈 목록과 저장소 권한
 
-`:viewer:web` owns everything native; a format module supplies only a `WebViewerConfig` (asset path of its HTML entry point, minimum WebView major version, whether the page does its own search) and its assets. The host must stay ignorant of formats.
+홈 목록은 기기 공용 저장소에 있는 지원 문서 전부다. 폴더 선택은 없다 (2026-10-12에 SAF 폴더 선택 방식에서 변경).
 
-- `createViewerWebView` serves everything from `https://appassets.androidplatform.net/` via `WebViewAssetLoader`. `/assets/…` maps to merged app assets; `/document/current` is streamed from the document Uri by `DocumentPathHandler`. Documents are never passed to JS as base64.
-- Any request the asset loader does not own gets a 403, and navigation off that origin is refused (`ViewerUrls.isInternal`). File and content access are disabled. JS/WASM is bundled in assets, never loaded from a CDN.
-- The bridge (`DocViewerBridge`) is deliberately tiny: `onLoaded(pageCount)`, `onPageChanged(page)`, `onFindResult`, `onError`. Native calls back through `window.docViewer.goToPage` and, when `pageHandlesSearch` is set, `find` / `findNext` / `clearFind`. The JS side of this contract is `viewer/web/src/main/assets/webhost/host.js`, which every viewer page imports; change both sides together.
-- `onError`'s message is dropped on purpose because it can quote document content. Never log document content or file names.
-- `WebViewerViewModel` gates on WebView version before loading anything (`CHECKING → LOADING → READY | FAILED`) and persists the current page in `SavedStateHandle` so rotation and process death restore the reading position.
+- `MediaStoreDocumentScanner`가 디렉터리를 훑지 않고 `MediaStore.Files`를 확장자로 한 번 조회한다. 그래서 Uri가 `content://media/external/file/<id>` 형태이고, 뷰어·최근 문서·즐겨찾기·공유가 스캔 방식과 무관하게 동작한다.
+- 권한은 `StorageAccess`가 API 수준 차이를 감춘다. API 30 이상은 `MANAGE_EXTERNAL_STORAGE`(시스템 설정의 "모든 파일에 대한 액세스" 토글), API 26–29는 `READ_EXTERNAL_STORAGE` 런타임 권한이다. API 29는 매니페스트의 `requestLegacyExternalStorage`에 의존한다.
+- 권한 요청 UI는 `feature/home/.../StorageAccessRequest.kt`에 있다. 결과를 콜백으로 받지 않는다. 홈 화면이 resume될 때마다 다시 스캔하므로(`LifecycleResumeEffect`) 설정 화면이나 권한 팝업에서 돌아오면 저절로 반영된다.
+- 권한이 없으면 스캐너가 `ScanResult.AccessRequired`를 돌려주고 홈은 `StorageStatus.ACCESS_REQUIRED` 화면을 보여준다.
+- 한계: 시스템이 아직 색인하지 않은 파일은 목록에 나오지 않는다. `Android/data`는 이 권한으로도 읽을 수 없다.
+- 이 권한은 Play Console에서 별도 신고와 심사가 필요하다 (`docs/release.md`).
 
-Engine constraints that explain otherwise odd code:
+### 웹 뷰어 (HWP, HWPX, DOCX)
 
-- **HWP/HWPX**: `@rhwp/core` 0.8.7 (Rust → WASM, ~12 MB). Needs WebView 96+ (WASM reference-types). Pages are rendered lazily as SVG, so search is implemented in the page (`search.js`) rather than with WebView find-in-page. Nanum Myeongjo is bundled because Korean serif fonts are missing below API 28 and line breaking depends on real glyph widths; see `docs/font-mapping.md`.
-- **DOCX**: docx-preview 0.4.1 + JSZip (used under MIT). Needs WebView 80+ (ES2020 syntax). Renders the whole document to DOM at once and uses WebView's find-in-page.
-- Below the minimum WebView version the viewer shows an update notice plus "open with another app" instead of attempting to load. A stock API 26 emulator has WebView 69, so neither format opens there — that is expected, not a bug.
+네이티브 쪽은 전부 `:viewer:web`이 맡는다. 포맷 모듈은 `WebViewerConfig`(HTML 진입점의 asset 경로, 최소 WebView 메이저 버전, 페이지가 검색을 직접 처리하는지)와 자기 assets만 제공한다. 호스트는 포맷을 몰라야 한다.
 
-### PDF viewer
+- `createViewerWebView`가 `WebViewAssetLoader`로 모든 것을 `https://appassets.androidplatform.net/` 아래에서 제공한다. `/assets/…`는 합쳐진 앱 assets, `/document/current`는 `DocumentPathHandler`가 문서 Uri에서 스트리밍한다. 문서를 base64로 JS에 넘기지 않는다.
+- asset 로더가 맡지 않는 요청은 403을 받고, 해당 origin을 벗어나는 이동은 거부한다(`ViewerUrls.isInternal`). 파일 접근과 콘텐츠 접근은 꺼져 있다. JS/WASM은 assets에 번들하고 CDN에서 불러오지 않는다.
+- 브리지(`DocViewerBridge`)는 일부러 작게 유지한다: `onLoaded(pageCount)`, `onPageChanged(page)`, `onFindResult`, `onError`. 네이티브는 `window.docViewer.goToPage`로, `pageHandlesSearch`가 켜져 있으면 `find` / `findNext` / `clearFind`로 호출한다. 이 계약의 JS 쪽은 모든 뷰어 페이지가 import하는 `viewer/web/src/main/assets/webhost/host.js`다. 양쪽을 함께 바꾼다.
+- `onError`의 메시지는 문서 내용을 인용할 수 있어서 일부러 버린다. 문서 내용과 파일명은 절대 로그에 남기지 않는다.
+- `WebViewerViewModel`은 무엇이든 로딩하기 전에 WebView 버전부터 확인한다(`CHECKING → LOADING → READY | FAILED`). 현재 페이지를 `SavedStateHandle`에 저장해 화면 회전과 프로세스 종료 후에도 읽던 위치를 복원한다.
 
-`PdfViewerScreen` branches on SDK level: API 28+ uses `androidx.pdf` (`pdf-viewer-fragment`, 1.0.0-beta01, minSdk 28); API 26–27 falls back to the `PdfRenderer`-based viewer in `viewer/pdf/.../legacy/`, which has no in-document search and cannot take a password.
+코드가 이상해 보이는 부분의 이유가 되는 엔진 제약:
 
-## Project rules (from Guide.md)
+- **HWP/HWPX**: `@rhwp/core` 0.8.7 (Rust → WASM, 약 12MB). WebView 96 이상이 필요하다 (WASM reference-types). 페이지를 SVG로 지연 렌더링하므로 검색을 WebView의 페이지 내 찾기가 아니라 페이지 안(`search.js`)에서 구현했다. API 28 미만에는 한글 명조 계열 폰트가 없고 줄바꿈이 실제 글리프 폭에 좌우되기 때문에 나눔명조를 번들했다. `docs/font-mapping.md` 참고.
+- **DOCX**: docx-preview 0.4.1 + JSZip (MIT로 사용). WebView 80 이상이 필요하다 (ES2020 문법). 문서 전체를 한 번에 DOM으로 렌더링하고 WebView의 페이지 내 찾기를 쓴다.
+- 최소 WebView 버전 미만이면 로딩을 시도하지 않고 업데이트 안내와 "다른 앱으로 열기"를 보여준다. 오래된 에뮬레이터 이미지에서 HWP가 열리지 않는 것은 버그가 아니라 의도된 동작이다.
 
-- Out of scope for v1, do not build: any editing, format conversion, legacy DOC/XLS/PPT, login or cloud sync. Ask when scope is unclear.
-- Dependencies: Apache-2.0, MIT or BSD only — **no GPL/AGPL** (e.g. MuPDF, iText). Check the licence before adding, then record name, version, licence and source in `docs/THIRD_PARTY.md`; the in-app licence list is `feature/settings/.../OpenSourceLibraries.kt` with texts in `feature/settings/src/main/assets/licenses/`.
-- Verify current library versions, APIs and minSdk against official docs before writing code against them; the stack here is recent and moves quickly.
-- If a rendering engine fails, report causes and alternatives and stop. Do not swap engines unilaterally.
-- UI strings go in `strings.xml`; Korean is the default language and the English translation is maintained alongside.
-- A ViewModel exposes a single `StateFlow<UiState>`; composables only render state.
-- IO runs on the injected dispatcher (`@IoDispatcher` in `:core:files`), never `Dispatchers.IO` directly.
-- Do not swallow exceptions; a failed open becomes a user-visible error state.
-- Comments explain "why" only.
-- No unused code, speculative abstractions or unrequested refactoring.
-- Repositories, ViewModels and format detection get unit tests.
-- Never imply affiliation with Hancom or Microsoft in the app name, icon or store text.
-- Get confirmation before hard-to-reverse work: large dependency swaps, module restructuring, bulk deletion.
-- Do not claim a check passed unless it was run; state plainly what could not be verified on an emulator or device.
+### PDF 뷰어
 
-## Emulator notes
+`PdfViewerScreen`이 SDK 수준으로 갈린다. API 28 이상은 `androidx.pdf`(`pdf-viewer-fragment`, 1.0.0-beta01, minSdk 28)를 쓰고, API 26–27은 `viewer/pdf/.../legacy/`의 `PdfRenderer` 기반 뷰어로 대체한다. 대체 뷰어는 문서 내 검색이 없고 암호를 받을 수 없다.
 
-- AVDs: `S26` (API 36, WebView 133) and `DocReader_API_26` (API 26, WebView 69). Both are slow; "System UI isn't responding" dialogs and janky-frame stats are emulator noise.
-- With `-no-window`, `screencap` on API 26 returns a blank image. Check UI there with `uiautomator dump` instead.
+## 프로젝트 규칙 (Guide.md에서)
 
-## Further reading
+- 1차 출시 범위 밖이므로 만들지 않는다: 모든 편집 기능, 포맷 변환, 구형 DOC/XLS/PPT, 로그인이나 클라우드 동기화. 범위가 애매하면 먼저 묻는다.
+- 의존성은 Apache-2.0, MIT, BSD만 허용한다. **GPL/AGPL 금지** (예: MuPDF, iText). 추가 전에 라이선스를 확인하고 이름, 버전, 라이선스, 출처를 `docs/THIRD_PARTY.md`에 기록한다. 앱 안의 라이선스 목록은 `feature/settings/.../OpenSourceLibraries.kt`, 전문은 `feature/settings/src/main/assets/licenses/`에 있다.
+- 라이브러리의 현재 버전, API, minSdk를 공식 문서에서 확인한 뒤 코드를 쓴다. 이 프로젝트의 스택은 최신이고 빠르게 바뀐다.
+- 렌더링 엔진이 동작하지 않으면 원인과 대안을 보고하고 멈춘다. 임의로 엔진을 바꾸지 않는다.
+- UI 문자열은 `strings.xml`에 둔다. 기본 언어는 한국어이고 영어 번역을 함께 유지한다.
+- ViewModel은 `StateFlow<UiState>` 하나만 노출하고 Composable은 상태를 그리기만 한다.
+- IO는 주입받은 디스패처(`:core:files`의 `@IoDispatcher`)에서 실행한다. `Dispatchers.IO`를 직접 쓰지 않는다.
+- 예외를 삼키지 않는다. 열기 실패는 사용자에게 보이는 오류 상태가 된다.
+- 주석은 "왜"만 쓴다.
+- 쓰지 않는 코드, 미래를 위한 추상화, 요청받지 않은 리팩터링을 넣지 않는다.
+- 리포지토리, ViewModel, 포맷 판별 로직에는 단위 테스트를 작성한다.
+- 앱 이름, 아이콘, 스토어 문구에서 한컴이나 Microsoft와 제휴한 것처럼 보이게 하지 않는다.
+- 되돌리기 어려운 작업은 먼저 확인받는다: 의존성 대규모 교체, 모듈 구조 변경, 대량 삭제.
+- 실행하지 않은 검증을 통과했다고 쓰지 않는다. 에뮬레이터나 기기에서 확인하지 못한 것은 그대로 밝힌다.
 
-- `docs/hwp-spike.md` — rhwp feasibility results, WASM feature requirements, load time and memory measurements
-- `docs/docx-renderer.md` — why docx-preview, its limits
-- `docs/font-mapping.md` — HWP font substitution
-- `docs/release.md` — signing, intent filters, verified / unverified checklist, pre-launch to-dos
-- `docs/THIRD_PARTY.md` — third-party inventory
+## 에뮬레이터 메모
+
+- `adb`와 `emulator`는 PATH에 없다. `$LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe`, `$LOCALAPPDATA/Android/Sdk/emulator/emulator.exe`를 쓴다.
+- AVD는 `Pixel_3_API_30`, `Nexus_5X_API_30`, `Pixel_2_API_33`이 있다 (2026-10-12 기준). API 26–29 이미지가 없어서 그 구간의 동작(런타임 저장소 권한, 대체 PDF 뷰어)은 에뮬레이터로 확인할 수 없다.
+- `Pixel_3_API_30`은 WebView가 83이라 DOCX는 열리지만 HWP/HWPX는 업데이트 안내 화면이 나온다.
+- `Pixel_2_API_33`은 부팅 중 adb가 `offline`에서 멈춘 적이 있다. `Pixel_3_API_30`은 `-no-snapshot -gpu swiftshader_indirect`로 정상 부팅됐다.
+- 에뮬레이터가 느리다. "System UI isn't responding" 대화상자와 프레임 지연 통계는 에뮬레이터 탓이다.
+- 화면 확인은 `uiautomator dump`로 텍스트를 읽는 방법이 가장 안정적이다.
+- 모든 파일 액세스를 테스트로 회수할 때 `appops set <패키지> MANAGE_EXTERNAL_STORAGE deny`는 효과가 없다 (설정 화면에서 허용하면 uid 모드로 기록돼 그쪽이 우선한다). 설정 화면에서 토글을 끈다.
+
+## 더 읽을 문서
+
+- `docs/hwp-spike.md` — rhwp 검증 결과, 필요한 WASM 기능, 로딩 시간과 메모리 측정
+- `docs/docx-renderer.md` — docx-preview를 고른 이유와 한계
+- `docs/font-mapping.md` — HWP 폰트 대체
+- `docs/release.md` — 서명, 인텐트 필터, 저장소 권한, 확인한 것 / 확인하지 못한 것, 출시 전 할 일
+- `docs/THIRD_PARTY.md` — 서드파티 목록
