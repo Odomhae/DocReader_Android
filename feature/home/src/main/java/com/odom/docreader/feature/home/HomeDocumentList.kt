@@ -8,15 +8,15 @@ internal fun buildDocumentList(
     tab: HomeTab,
     query: String,
     sortOrder: SortOrder,
-    folderDocuments: List<DocumentFile>,
+    storageDocuments: List<DocumentFile>,
     recentDocuments: List<DocumentFile>,
     favoriteDocuments: List<DocumentFile>,
 ): List<DocumentListItem> {
     val documents = when (tab) {
-        HomeTab.ALL -> folderDocuments.sortedWith(sortOrder.comparator)
-        HomeTab.PDF -> folderDocuments.filter { it.type == DocumentType.PDF }.sortedWith(sortOrder.comparator)
-        HomeTab.DOCX -> folderDocuments.filter { it.type == DocumentType.DOCX }.sortedWith(sortOrder.comparator)
-        HomeTab.HWP -> folderDocuments
+        HomeTab.ALL -> storageDocuments.sortedWith(sortOrder.comparator)
+        HomeTab.PDF -> storageDocuments.filter { it.type == DocumentType.PDF }.sortedWith(sortOrder.comparator)
+        HomeTab.DOCX -> storageDocuments.filter { it.type == DocumentType.DOCX }.sortedWith(sortOrder.comparator)
+        HomeTab.HWP -> storageDocuments
             .filter { it.type == DocumentType.HWP || it.type == DocumentType.HWPX }
             .sortedWith(sortOrder.comparator)
         // Recency is the whole point of this tab, so the chosen sort order does not apply.

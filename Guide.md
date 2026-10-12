@@ -18,7 +18,6 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 - 포맷 변환, 스캔, 템플릿
 - 구형 DOC, XLS/XLSX, PPT/PPTX
 - 로그인, 클라우드 동기화
-- MANAGE_EXTERNAL_STORAGE 권한
 
 요청받지 않은 기능은 추가하지 않는다. 범위가 애매하면 먼저 질문한다.
 
@@ -54,7 +53,7 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 :app                 진입점, 내비게이션 그래프, 테마, 인텐트 처리
 :core:model          DocumentFile, DocumentType 등 공용 모델
 :core:data           Room, DataStore, 리포지토리
-:core:files          SAF 폴더 접근, 파일 스캔, MIME/확장자 판별
+:core:files          저장소 접근 권한, 파일 스캔, MIME/확장자 판별
 :core:ui             공용 Composable, 디자인 토큰
 :feature:home        파일 목록, 탭, 검색, 정렬
 :feature:settings    설정, 오픈소스 라이선스
@@ -70,7 +69,8 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 ## 4. 핵심 설계 결정
 
 ### 파일 접근
-- SAF(`ACTION_OPEN_DOCUMENT_TREE`)로 사용자가 고른 폴더만 읽는다. `takePersistableUriPermission`으로 권한을 유지한다.
+- 기기 전체의 지원 문서를 목록에 보여준다. API 30 이상은 `MANAGE_EXTERNAL_STORAGE`(모든 파일 액세스), API 26–29는 `READ_EXTERNAL_STORAGE`를 쓴다. (2026-10-12 결정: 폴더를 고르는 SAF 방식에서 변경. Play Console에서 모든 파일 액세스 권한 신고가 필요하다.)
+- 목록은 디렉터리를 직접 훑지 않고 `MediaStore.Files`를 조회해 만든다.
 - 파일은 경로가 아니라 `content://` Uri로 다룬다.
 - 외부 앱에서 넘어온 Uri는 권한이 일시적일 수 있으므로, 최근 문서에 기록할 때 권한 유지 가능 여부를 확인한다.
 - 포맷 판별은 확장자와 MIME 타입을 함께 본다. HWP는 MIME이 일정하지 않으므로 확장자와 파일 시그니처로 보완한다.
@@ -111,8 +111,8 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 - 완료 기준: `./gradlew assembleDebug` 성공, 빈 홈 화면이 뜬다.
 
 ### M2. 파일 목록 (홈)
-- 폴더 선택, 지원 포맷 스캔, 탭/검색/정렬, 최근 문서와 즐겨찾기(Room).
-- 완료 기준: 폴더를 고르면 지원 포맷 파일만 목록에 나오고, 앱을 재시작해도 폴더 권한과 최근/즐겨찾기가 유지된다. 빈 상태와 권한 없음 상태 화면이 있다.
+- 저장소 접근 권한, 지원 포맷 스캔, 탭/검색/정렬, 최근 문서와 즐겨찾기(Room).
+- 완료 기준: 권한을 허용하면 기기의 지원 포맷 파일만 목록에 나오고, 앱을 재시작해도 최근/즐겨찾기가 유지된다. 빈 상태와 권한 없음 상태 화면이 있다.
 
 ### M3. PDF 뷰어
 - `androidx.pdf` 연결, 페이지 표시, 확대/축소, 문서 내 검색, 공유.

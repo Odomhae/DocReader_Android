@@ -13,6 +13,8 @@ object DocumentTypeDetector {
         "hwpx" to DocumentType.HWPX,
     )
 
+    val extensions: Set<String> get() = typesByExtension.keys
+
     // HWP has no single registered MIME type; providers report any of these.
     private val typesByMimeType = mapOf(
         "application/pdf" to DocumentType.PDF,

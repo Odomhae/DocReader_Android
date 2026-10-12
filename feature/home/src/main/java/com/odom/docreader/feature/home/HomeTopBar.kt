@@ -29,7 +29,6 @@ import com.odom.docreader.core.ui.R as UiR
 internal fun HomeTopBar(
     sortOrder: SortOrder,
     onSortOrderSelected: (SortOrder) -> Unit,
-    onPickFolder: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     var sortMenuExpanded by remember { mutableStateOf(false) }
@@ -54,12 +53,6 @@ internal fun HomeTopBar(
                         },
                     )
                 }
-            }
-            IconButton(onClick = onPickFolder) {
-                Icon(
-                    painterResource(UiR.drawable.ic_folder_open),
-                    contentDescription = stringResource(R.string.home_pick_folder),
-                )
             }
             IconButton(onClick = onOpenSettings) {
                 Icon(

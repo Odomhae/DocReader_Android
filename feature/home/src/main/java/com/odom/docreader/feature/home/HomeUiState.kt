@@ -12,13 +12,11 @@ enum class HomeTab {
     FAVORITES,
 }
 
-enum class FolderStatus {
-    /** No folder has been picked yet. */
-    NOT_SELECTED,
+enum class StorageStatus {
     LOADING,
 
-    /** The saved folder lost its permission or no longer exists. */
-    UNAVAILABLE,
+    /** Storage access was never granted or has been revoked. */
+    ACCESS_REQUIRED,
     READY,
 }
 
@@ -28,7 +26,7 @@ data class DocumentListItem(
 )
 
 data class HomeUiState(
-    val folderStatus: FolderStatus = FolderStatus.LOADING,
+    val storageStatus: StorageStatus = StorageStatus.LOADING,
     val selectedTab: HomeTab = HomeTab.ALL,
     val query: String = "",
     val sortOrder: SortOrder = SortOrder.NAME,

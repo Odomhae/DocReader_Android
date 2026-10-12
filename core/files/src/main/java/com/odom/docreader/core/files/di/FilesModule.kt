@@ -3,9 +3,7 @@ package com.odom.docreader.core.files.di
 import com.odom.docreader.core.files.ContentExternalDocumentResolver
 import com.odom.docreader.core.files.DocumentScanner
 import com.odom.docreader.core.files.ExternalDocumentResolver
-import com.odom.docreader.core.files.FolderAccess
-import com.odom.docreader.core.files.SafDocumentScanner
-import com.odom.docreader.core.files.SafFolderAccess
+import com.odom.docreader.core.files.MediaStoreDocumentScanner
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -18,10 +16,7 @@ import kotlinx.coroutines.Dispatchers
 @InstallIn(SingletonComponent::class)
 abstract class FilesModule {
     @Binds
-    abstract fun bindDocumentScanner(scanner: SafDocumentScanner): DocumentScanner
-
-    @Binds
-    abstract fun bindFolderAccess(folderAccess: SafFolderAccess): FolderAccess
+    abstract fun bindDocumentScanner(scanner: MediaStoreDocumentScanner): DocumentScanner
 
     @Binds
     abstract fun bindExternalDocumentResolver(resolver: ContentExternalDocumentResolver): ExternalDocumentResolver

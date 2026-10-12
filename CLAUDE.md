@@ -13,7 +13,7 @@ DocReader (`com.odom.docreader`) is a view-only Android document viewer for PDF,
 Gradle needs JDK 21. On this machine the `java` on PATH is 1.8 and `Android Studio/jbr` is broken, so set this first:
 
 ```bash
-export JAVA_HOME="C:/Program Files/Android/Android Studio1/jbr"
+export JAVA_HOME="C:/Program Files/Android/Android Studio2/jbr"
 ```
 
 Run all three before reporting work as done (Guide.md §7):
@@ -61,7 +61,7 @@ python samples/make-office-samples.py samples                                # D
 :app                 entry point, nav graph, ACTION_VIEW intent handling
 :core:model          DocumentFile, DocumentType, SortOrder (pure JVM)
 :core:data           Room (recent/favourites), DataStore (settings), repositories
-:core:files          SAF folder access, scanning, format detection, share / open-with
+:core:files          storage access, scanning, format detection, share / open-with
 :core:ui             theme, shared composables and icons
 :feature:home        file list, tabs, search, sort
 :feature:settings    settings, open-source licences screen
@@ -81,7 +81,7 @@ Assets from every module merge into one namespace, so each module keeps its file
 
 Files are always `content://` Uris, never paths. Two entry points converge on one route:
 
-- Home list → `ViewerRoute(uri, name, type)`.
+- Home list → `ViewerRoute(uri, name, type)`. The list is every supported document on shared storage, read from `MediaStore.Files` (`MediaStoreDocumentScanner`), so its Uris are `content://media/external/file/<id>`. That needs "all files access" (`MANAGE_EXTERNAL_STORAGE`) on API 30+ and `READ_EXTERNAL_STORAGE` on API 26–29; `StorageAccess` hides the difference. There is no folder picker.
 - `ACTION_VIEW` from another app → `MainActivity` → `MainViewModel.onViewIntent` → `ExternalDocumentResolver` re-detects the real format from file name, MIME type and file signature (`DocumentTypeDetector`; HWP MIME types are unreliable) → `IncomingDocument` → `DocReaderNavHost` navigates. The document is added to recents only if the sender granted a persistable permission, since a temporary grant would be a dead entry on next launch.
 
 `DocReaderNavHost` dispatches `ViewerRoute` to a viewer screen by `DocumentType`. The type travels as its enum name string, and both the nav host and `RoomLibraryRepository` tolerate an unknown name (unsupported screen / skipped row) rather than crashing.
@@ -108,7 +108,7 @@ Engine constraints that explain otherwise odd code:
 
 ## Project rules (from Guide.md)
 
-- Out of scope for v1, do not build: any editing, format conversion, legacy DOC/XLS/PPT, login or cloud sync, `MANAGE_EXTERNAL_STORAGE`. Ask when scope is unclear.
+- Out of scope for v1, do not build: any editing, format conversion, legacy DOC/XLS/PPT, login or cloud sync. Ask when scope is unclear.
 - Dependencies: Apache-2.0, MIT or BSD only — **no GPL/AGPL** (e.g. MuPDF, iText). Check the licence before adding, then record name, version, licence and source in `docs/THIRD_PARTY.md`; the in-app licence list is `feature/settings/.../OpenSourceLibraries.kt` with texts in `feature/settings/src/main/assets/licenses/`.
 - Verify current library versions, APIs and minSdk against official docs before writing code against them; the stack here is recent and moves quickly.
 - If a rendering engine fails, report causes and alternatives and stop. Do not swap engines unilaterally.

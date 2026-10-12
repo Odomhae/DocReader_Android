@@ -1,7 +1,5 @@
 package com.odom.docreader.feature.home
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,10 +26,9 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        if (uri != null) viewModel.onFolderPicked(uri.toString())
-    }
-    // Files can be added or removed while the app is in the background.
+    val requestStorageAccess = rememberStorageAccessRequest()
+    // Files can be added or removed, and access granted or revoked in system settings, while the
+    // app is in the background.
     LifecycleResumeEffect(viewModel) {
         viewModel.refresh()
         onPauseOrDispose {}
@@ -39,7 +36,7 @@ fun HomeScreen(
 
     HomeContent(
         uiState = uiState,
-        onPickFolder = { folderPicker.launch(null) },
+        onGrantAccess = requestStorageAccess,
         onOpenSettings = onOpenSettings,
         onQueryChanged = viewModel::onQueryChanged,
         onSortOrderSelected = viewModel::onSortOrderSelected,
@@ -56,7 +53,7 @@ fun HomeScreen(
 @Composable
 internal fun HomeContent(
     uiState: HomeUiState,
-    onPickFolder: () -> Unit,
+    onGrantAccess: () -> Unit,
     onOpenSettings: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onSortOrderSelected: (SortOrder) -> Unit,
@@ -71,34 +68,25 @@ internal fun HomeContent(
             HomeTopBar(
                 sortOrder = uiState.sortOrder,
                 onSortOrderSelected = onSortOrderSelected,
-                onPickFolder = onPickFolder,
                 onOpenSettings = onOpenSettings,
             )
         },
     ) { innerPadding ->
         val contentModifier = Modifier.fillMaxSize().padding(innerPadding)
-        when (uiState.folderStatus) {
-            FolderStatus.NOT_SELECTED -> EmptyState(
-                title = stringResource(R.string.home_no_folder_title),
-                message = stringResource(R.string.home_no_folder_message),
-                actionLabel = stringResource(R.string.home_pick_folder),
-                onAction = onPickFolder,
+        when (uiState.storageStatus) {
+            StorageStatus.ACCESS_REQUIRED -> EmptyState(
+                title = stringResource(R.string.home_access_required_title),
+                message = stringResource(R.string.home_access_required_message),
+                actionLabel = stringResource(R.string.home_grant_access),
+                onAction = onGrantAccess,
                 modifier = contentModifier,
             )
 
-            FolderStatus.UNAVAILABLE -> EmptyState(
-                title = stringResource(R.string.home_folder_unavailable_title),
-                message = stringResource(R.string.home_folder_unavailable_message),
-                actionLabel = stringResource(R.string.home_reselect_folder),
-                onAction = onPickFolder,
-                modifier = contentModifier,
-            )
-
-            FolderStatus.LOADING -> Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
+            StorageStatus.LOADING -> Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
 
-            FolderStatus.READY -> Column(modifier = contentModifier) {
+            StorageStatus.READY -> Column(modifier = contentModifier) {
                 HomeSearchField(query = uiState.query, onQueryChanged = onQueryChanged)
                 HomeTabRow(selectedTab = uiState.selectedTab, onTabSelected = onTabSelected)
                 if (uiState.documents.isEmpty()) {
@@ -121,6 +109,6 @@ private fun emptyMessage(uiState: HomeUiState): String = stringResource(
         uiState.query.isNotBlank() -> R.string.home_empty_search
         uiState.selectedTab == HomeTab.RECENT -> R.string.home_empty_recent
         uiState.selectedTab == HomeTab.FAVORITES -> R.string.home_empty_favorites
-        else -> R.string.home_empty_folder
+        else -> R.string.home_empty_documents
     },
 )

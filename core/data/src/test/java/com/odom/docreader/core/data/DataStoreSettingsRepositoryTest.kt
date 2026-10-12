@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -24,7 +23,6 @@ class DataStoreSettingsRepositoryTest {
     fun defaultsBeforeAnythingIsSaved() = runTest {
         val repository = createRepository()
 
-        assertNull(repository.folderUri.first())
         assertEquals(SortOrder.NAME, repository.sortOrder.first())
     }
 
@@ -32,10 +30,8 @@ class DataStoreSettingsRepositoryTest {
     fun savedValuesAreReadBack() = runTest {
         val repository = createRepository()
 
-        repository.setFolderUri("content://tree/docs")
         repository.setSortOrder(SortOrder.SIZE)
 
-        assertEquals("content://tree/docs", repository.folderUri.first())
         assertEquals(SortOrder.SIZE, repository.sortOrder.first())
     }
 }
