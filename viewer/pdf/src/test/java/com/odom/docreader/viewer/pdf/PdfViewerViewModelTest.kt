@@ -22,8 +22,25 @@ class PdfViewerViewModelTest {
     @Test
     fun aLaterSuccessfulLoadClearsTheFailure() {
         viewModel.onDocumentFailed(PdfLoadFailure.UNREADABLE)
-        viewModel.onDocumentLoaded()
+        viewModel.onDocumentLoaded(pageCount = 3)
 
         assertNull(viewModel.uiState.value.failure)
+    }
+
+    @Test
+    fun loadedDocumentReportsItsPageCount() {
+        viewModel.onDocumentLoaded(pageCount = 120)
+
+        assertEquals(120, viewModel.uiState.value.pageCount)
+        assertEquals(1, viewModel.uiState.value.currentPage)
+    }
+
+    @Test
+    fun currentPageFollowsTheViewer() {
+        viewModel.onDocumentLoaded(pageCount = 120)
+
+        viewModel.onPageChanged(42)
+
+        assertEquals(42, viewModel.uiState.value.currentPage)
     }
 }

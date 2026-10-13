@@ -18,21 +18,47 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.odom.docreader.core.files.shareDocument
 import com.odom.docreader.core.model.DocumentType
+import com.odom.docreader.core.model.PaperColor
 import com.odom.docreader.core.ui.EmptyState
+import com.odom.docreader.core.ui.PageBar
 import com.odom.docreader.core.ui.R as UiR
 import com.odom.docreader.viewer.pdf.legacy.LegacyPdfViewer
 
 @Composable
-fun PdfViewerScreen(uri: String, title: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun PdfViewerScreen(
+    uri: String,
+    title: String,
+    onBack: () -> Unit,
+    paperColor: PaperColor,
+    onReadingSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     // androidx.pdf's minSdk is 28; older devices get the PdfRenderer-based viewer.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        AndroidxPdfViewer(uri = uri, title = title, onBack = onBack, modifier = modifier)
+        AndroidxPdfViewer(
+            uri = uri,
+            title = title,
+            onBack = onBack,
+            paperColor = paperColor,
+            onReadingSettings = onReadingSettings,
+            modifier = modifier,
+        )
     } else {
-        LegacyPdfViewer(uri = uri, title = title, onBack = onBack, modifier = modifier)
+        LegacyPdfViewer(
+            uri = uri,
+            title = title,
+            onBack = onBack,
+            paperColor = paperColor,
+            onReadingSettings = onReadingSettings,
+            modifier = modifier,
+        )
     }
 }
 
-/** Top bar shared by both PDF viewers. [onSearch] is null when in-document search is unavailable. */
+/**
+ * Top and bottom bars shared by both PDF viewers. [onSearch] is null when in-document search is
+ * unavailable; the page bar is hidden while [pageCount] is 0.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PdfViewerScaffold(
@@ -40,6 +66,10 @@ internal fun PdfViewerScaffold(
     title: String,
     onBack: () -> Unit,
     onSearch: (() -> Unit)?,
+    onReadingSettings: () -> Unit,
+    pageCount: Int,
+    currentPage: Int,
+    onGoToPage: (Int) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable (Modifier) -> Unit,
 ) {
@@ -66,6 +96,12 @@ internal fun PdfViewerScaffold(
                             )
                         }
                     }
+                    IconButton(onClick = onReadingSettings) {
+                        Icon(
+                            painterResource(UiR.drawable.ic_reading_settings),
+                            contentDescription = stringResource(R.string.pdf_reading_settings),
+                        )
+                    }
                     IconButton(onClick = { shareDocument(context, Uri.parse(uri), DocumentType.PDF) }) {
                         Icon(
                             painterResource(UiR.drawable.ic_share),
@@ -74,6 +110,11 @@ internal fun PdfViewerScaffold(
                     }
                 },
             )
+        },
+        bottomBar = {
+            if (pageCount > 0) {
+                PageBar(currentPage = currentPage, pageCount = pageCount, onGoToPage = onGoToPage)
+            }
         },
     ) { innerPadding ->
         content(Modifier.fillMaxSize().padding(innerPadding))

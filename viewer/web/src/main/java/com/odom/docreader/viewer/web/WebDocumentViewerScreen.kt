@@ -5,10 +5,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -17,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,7 +39,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.odom.docreader.core.files.openWithOtherApp
 import com.odom.docreader.core.files.shareDocument
 import com.odom.docreader.core.model.DocumentType
+import com.odom.docreader.core.model.PaperColor
+import com.odom.docreader.core.ui.PageBar
 import com.odom.docreader.core.ui.R as UiR
+import com.odom.docreader.core.ui.sepiaPaper
 
 /** What a format module tells the host: where its viewer page is and what it needs to run. */
 data class WebViewerConfig(
@@ -61,6 +61,8 @@ fun WebDocumentViewerScreen(
     uri: String,
     title: String,
     onBack: () -> Unit,
+    paperColor: PaperColor,
+    onReadingSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WebViewerViewModel = hiltViewModel(),
 ) {
@@ -97,6 +99,7 @@ fun WebDocumentViewerScreen(
                     title = title,
                     onBack = onBack,
                     onSearch = if (uiState.status == WebViewerStatus.READY) viewModel::onSearchOpened else null,
+                    onReadingSettings = onReadingSettings,
                     onShare = { shareDocument(context, documentUri, config.documentType) },
                 )
             }
@@ -122,7 +125,7 @@ fun WebDocumentViewerScreen(
                 modifier = contentModifier,
             )
 
-            else -> Box(modifier = contentModifier) {
+            else -> Box(modifier = contentModifier.sepiaPaper(paperColor == PaperColor.SEPIA)) {
                 WebDocumentView(
                     entryAssetPath = config.entryAssetPath,
                     documentUri = documentUri,
@@ -147,7 +150,13 @@ fun WebDocumentViewerScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ViewerTopBar(title: String, onBack: () -> Unit, onSearch: (() -> Unit)?, onShare: () -> Unit) {
+private fun ViewerTopBar(
+    title: String,
+    onBack: () -> Unit,
+    onSearch: (() -> Unit)?,
+    onReadingSettings: () -> Unit,
+    onShare: () -> Unit,
+) {
     TopAppBar(
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         navigationIcon = {
@@ -163,6 +172,12 @@ private fun ViewerTopBar(title: String, onBack: () -> Unit, onSearch: (() -> Uni
                         contentDescription = stringResource(R.string.web_search),
                     )
                 }
+            }
+            IconButton(onClick = onReadingSettings) {
+                Icon(
+                    painterResource(UiR.drawable.ic_reading_settings),
+                    contentDescription = stringResource(R.string.web_reading_settings),
+                )
             }
             IconButton(onClick = onShare) {
                 Icon(painterResource(UiR.drawable.ic_share), contentDescription = stringResource(R.string.web_share))
@@ -225,35 +240,6 @@ private fun SearchTopBar(
             }
         },
     )
-}
-
-@Composable
-private fun PageBar(currentPage: Int, pageCount: Int, onGoToPage: (Int) -> Unit) {
-    Surface(tonalElevation = 3.dp) {
-        Row(
-            modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = { onGoToPage(currentPage - 1) }, enabled = currentPage > 1) {
-                Icon(
-                    painterResource(UiR.drawable.ic_chevron_left),
-                    contentDescription = stringResource(R.string.web_previous_page),
-                )
-            }
-            Text(
-                text = stringResource(R.string.web_page_indicator, currentPage, pageCount),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.labelLarge,
-            )
-            IconButton(onClick = { onGoToPage(currentPage + 1) }, enabled = currentPage < pageCount) {
-                Icon(
-                    painterResource(UiR.drawable.ic_chevron_right),
-                    contentDescription = stringResource(R.string.web_next_page),
-                )
-            }
-        }
-    }
 }
 
 @Composable

@@ -3,6 +3,7 @@ package com.odom.docreader.viewer.docx
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.odom.docreader.core.model.DocumentType
+import com.odom.docreader.core.model.PaperColor
 import com.odom.docreader.viewer.web.WebDocumentViewerScreen
 import com.odom.docreader.viewer.web.WebViewerConfig
 
@@ -16,6 +17,21 @@ private val DOCX_CONFIG = WebViewerConfig(
 )
 
 @Composable
-fun DocxViewerScreen(uri: String, title: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    WebDocumentViewerScreen(config = DOCX_CONFIG, uri = uri, title = title, onBack = onBack, modifier = modifier)
+fun DocxViewerScreen(
+    uri: String,
+    title: String,
+    onBack: () -> Unit,
+    paperColor: PaperColor,
+    onReadingSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    WebDocumentViewerScreen(
+        config = DOCX_CONFIG,
+        uri = uri,
+        title = title,
+        onBack = onBack,
+        paperColor = paperColor,
+        onReadingSettings = onReadingSettings,
+        modifier = modifier,
+    )
 }

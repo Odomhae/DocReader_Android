@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.odom.docreader.core.model.DocumentType
+import com.odom.docreader.core.model.PaperColor
 import com.odom.docreader.viewer.web.WebDocumentViewerScreen
 import com.odom.docreader.viewer.web.WebViewerConfig
 
@@ -17,6 +18,8 @@ fun HwpViewerScreen(
     title: String,
     type: DocumentType,
     onBack: () -> Unit,
+    paperColor: PaperColor,
+    onReadingSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val config = remember(type) {
@@ -28,5 +31,13 @@ fun HwpViewerScreen(
             pageHandlesSearch = true,
         )
     }
-    WebDocumentViewerScreen(config = config, uri = uri, title = title, onBack = onBack, modifier = modifier)
+    WebDocumentViewerScreen(
+        config = config,
+        uri = uri,
+        title = title,
+        onBack = onBack,
+        paperColor = paperColor,
+        onReadingSettings = onReadingSettings,
+        modifier = modifier,
+    )
 }

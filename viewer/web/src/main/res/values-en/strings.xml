@@ -1,13 +1,12 @@
 <resources>
     <string name="web_back">Back</string>
     <string name="web_search">Search in document</string>
+    <string name="web_reading_settings">Reading settings</string>
     <string name="web_share">Share</string>
     <string name="web_search_hint">Find in document</string>
     <string name="web_search_close">Close search</string>
     <string name="web_search_previous">Previous match</string>
     <string name="web_search_next">Next match</string>
-    <string name="web_previous_page">Previous page</string>
-    <string name="web_next_page">Next page</string>
     <string name="web_error_title">Can\'t open this document</string>
     <string name="web_error_render">The file is damaged or contains content that is not supported.</string>
     <string name="web_error_renderer_crashed">Something went wrong while showing the document. It may be too large, or the device may be low on memory.</string>

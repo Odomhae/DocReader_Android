@@ -117,6 +117,24 @@ python samples/make-office-samples.py samples                                # D
 
 `PdfViewerScreen`이 SDK 수준으로 갈린다. API 28 이상은 `androidx.pdf`(`pdf-viewer-fragment`, 1.0.0-beta01, minSdk 28)를 쓰고, API 26–27은 `viewer/pdf/.../legacy/`의 `PdfRenderer` 기반 뷰어로 대체한다. 대체 뷰어는 문서 내 검색이 없고 암호를 받을 수 없다.
 
+### 쪽 표시 막대
+
+모든 뷰어의 아래 막대는 `:core:ui`의 `PageBar` 하나다 (이전/다음, 현재 쪽 번호를 눌러 수정하면 그 쪽으로 이동). 입력 해석은 `:core:model`의 `resolvePageInput`이 하고, 범위를 벗어난 번호는 가장 가까운 쪽으로 보낸다.
+
+- 웹 뷰어는 기존 브리지(`onPageChanged`, `goToPage`)를 그대로 쓴다.
+- `androidx.pdf`는 프래그먼트의 `onPdfViewCreated`로 받은 `PdfView`에서 현재 쪽을 듣고 `scrollToPage`를 호출한다. 현재 쪽은 첫 보이는 쪽이 아니라 화면 가운데에 있는 쪽이다 (`scrollToPage`가 대상 쪽을 가운데에 맞추기 때문에 첫 보이는 쪽으로 세면 이전/다음이 멈춘다). 이 콜백은 1.0.0-beta01에서 `@ExperimentalPdfApi`라서 라이브러리를 올릴 때 시그니처가 바뀌었는지 확인한다.
+- 구형 PDF 뷰어는 `LazyListState`의 첫 보이는 항목을 현재 쪽으로 쓴다.
+- 막대는 번호를 수정하는 동안에만 키보드 위로 올라온다. 그래서 액티비티가 `adjustResize`다.
+
+### 읽기 설정 (종이색, 밝기)
+
+뷰어 안에서만 적용된다. 앱 UI는 라이트 고정이고 색 반전(다크) 모드는 없다.
+
+- 상태는 `:app`의 `ReadingSettingsViewModel`(액티비티 범위) 하나가 갖고, `ViewerDestination`이 뷰어 화면에 `paperColor`와 `onReadingSettings`만 넘긴다. 뷰어 모듈은 `:core:data`에 의존하지 않는다.
+- 세피아는 포맷과 무관하게 문서 영역 위에 곱하기 블렌드로 색을 덮는 `Modifier.sepiaPaper`(`:core:ui`) 하나로 처리한다. 뷰어 페이지의 CSS/JS는 건드리지 않는다.
+- 밝기는 `ViewerDestination`이 창의 `screenBrightness`를 바꾸고 뷰어를 나가면 되돌린다. "시스템 밝기 사용"이 켜져 있으면 값을 건드리지 않는다.
+- 저장은 `ReadingSettingsRepository`(DataStore). 슬라이더는 드래그가 끝날 때 한 번만 저장한다.
+
 ## 프로젝트 규칙 (Guide.md에서)
 
 - 1차 출시 범위 밖이므로 만들지 않는다: 모든 편집 기능, 포맷 변환, 구형 DOC/XLS/PPT, 로그인이나 클라우드 동기화. 범위가 애매하면 먼저 묻는다.

@@ -1,0 +1,5 @@
+<resources>
+    <string name="page_previous">Previous page</string>
+    <string name="page_next">Next page</string>
+    <string name="page_number_field">Page number. Enter a page to go to</string>
+</resources>

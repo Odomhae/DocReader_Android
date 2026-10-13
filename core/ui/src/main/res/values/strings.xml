@@ -1,0 +1,6 @@
+<resources>
+    <string name="page_previous">이전 쪽</string>
+    <string name="page_next">다음 쪽</string>
+    <string name="page_number_field">쪽 번호. 이동할 쪽을 입력하세요</string>
+    <string name="page_count" translatable="false">/ %1$d</string>
+</resources>

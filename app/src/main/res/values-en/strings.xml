@@ -3,4 +3,9 @@
     <string name="navigate_back">Back</string>
     <string name="unsupported_title">Can\'t open this file</string>
     <string name="unsupported_message">The format is not supported or the file can\'t be read. Only PDF, DOCX, HWP and HWPX files can be opened.</string>
+    <string name="reading_paper_color">Paper color</string>
+    <string name="reading_paper_white">White</string>
+    <string name="reading_paper_sepia">Sepia</string>
+    <string name="reading_brightness">Brightness</string>
+    <string name="reading_use_system_brightness">Use system brightness</string>
 </resources>

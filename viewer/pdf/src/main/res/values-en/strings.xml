@@ -1,6 +1,7 @@
 <resources>
     <string name="pdf_back">Back</string>
     <string name="pdf_search">Search in document</string>
+    <string name="pdf_reading_settings">Reading settings</string>
     <string name="pdf_share">Share</string>
     <string name="pdf_error_title">Can\'t open this PDF</string>
     <string name="pdf_error_password_required">This document is password protected. Enter its password to open it.</string>

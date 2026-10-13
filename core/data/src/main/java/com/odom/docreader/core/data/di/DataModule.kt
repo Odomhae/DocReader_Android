@@ -6,8 +6,10 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import com.odom.docreader.core.data.DataStoreReadingSettingsRepository
 import com.odom.docreader.core.data.DataStoreSettingsRepository
 import com.odom.docreader.core.data.LibraryRepository
+import com.odom.docreader.core.data.ReadingSettingsRepository
 import com.odom.docreader.core.data.RoomLibraryRepository
 import com.odom.docreader.core.data.SettingsRepository
 import com.odom.docreader.core.data.db.DocReaderDatabase
@@ -33,6 +35,9 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindSettingsRepository(repository: DataStoreSettingsRepository): SettingsRepository
+
+    @Binds
+    abstract fun bindReadingSettingsRepository(repository: DataStoreReadingSettingsRepository): ReadingSettingsRepository
 
     companion object {
         @Provides

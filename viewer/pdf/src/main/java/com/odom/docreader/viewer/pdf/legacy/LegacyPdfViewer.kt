@@ -13,15 +13,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,9 +42,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.odom.docreader.core.model.PaperColor
+import com.odom.docreader.core.ui.sepiaPaper
 import com.odom.docreader.viewer.pdf.PdfFailureMessage
 import com.odom.docreader.viewer.pdf.PdfViewerScaffold
 import com.odom.docreader.viewer.pdf.R
+import kotlinx.coroutines.launch
 
 private const val MAX_ZOOM = 4f
 
@@ -57,13 +64,28 @@ internal fun LegacyPdfViewer(
     uri: String,
     title: String,
     onBack: () -> Unit,
+    paperColor: PaperColor,
+    onReadingSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LegacyPdfViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(uri) { viewModel.open(uri) }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val currentPage by remember { derivedStateOf { listState.firstVisibleItemIndex + 1 } }
 
-    PdfViewerScaffold(uri = uri, title = title, onBack = onBack, onSearch = null, modifier = modifier) { contentModifier ->
+    PdfViewerScaffold(
+        uri = uri,
+        title = title,
+        onBack = onBack,
+        onSearch = null,
+        onReadingSettings = onReadingSettings,
+        pageCount = (uiState as? LegacyPdfUiState.Ready)?.pageCount ?: 0,
+        currentPage = currentPage,
+        onGoToPage = { page -> scope.launch { listState.scrollToItem(page - 1) } },
+        modifier = modifier,
+    ) { contentModifier ->
         when (val state = uiState) {
             LegacyPdfUiState.Loading -> Box(contentModifier, contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -73,8 +95,9 @@ internal fun LegacyPdfViewer(
 
             is LegacyPdfUiState.Ready -> PdfPageList(
                 pageCount = state.pageCount,
+                listState = listState,
                 renderPage = viewModel::renderPage,
-                modifier = contentModifier,
+                modifier = contentModifier.sepiaPaper(paperColor == PaperColor.SEPIA),
             )
         }
     }
@@ -83,10 +106,10 @@ internal fun LegacyPdfViewer(
 @Composable
 private fun PdfPageList(
     pageCount: Int,
+    listState: LazyListState,
     renderPage: suspend (pageIndex: Int, widthPx: Int) -> android.graphics.Bitmap?,
     modifier: Modifier = Modifier,
 ) {
-    val listState = rememberLazyListState()
     var zoom by rememberSaveable { mutableFloatStateOf(1f) }
     var offsetX by rememberSaveable { mutableFloatStateOf(0f) }
 
