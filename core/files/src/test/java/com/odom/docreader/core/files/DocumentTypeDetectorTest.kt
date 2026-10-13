@@ -19,6 +19,7 @@ class DocumentTypeDetectorTest {
         assertEquals(DocumentType.DOCX, DocumentTypeDetector.detect("letter.docx", null))
         assertEquals(DocumentType.HWP, DocumentTypeDetector.detect("공문.hwp", null))
         assertEquals(DocumentType.HWPX, DocumentTypeDetector.detect("공문.HwpX", null))
+        assertEquals(DocumentType.TXT, DocumentTypeDetector.detect("메모.TXT", null))
     }
 
     @Test
@@ -34,6 +35,7 @@ class DocumentTypeDetectorTest {
         assertEquals(DocumentType.HWP, DocumentTypeDetector.detect(null, "application/x-hwp"))
         assertEquals(DocumentType.HWP, DocumentTypeDetector.detect(null, "application/haansofthwp"))
         assertEquals(DocumentType.HWPX, DocumentTypeDetector.detect(null, "application/hwp+zip"))
+        assertEquals(DocumentType.TXT, DocumentTypeDetector.detect("download", "text/plain; charset=utf-8"))
         assertEquals(
             DocumentType.DOCX,
             DocumentTypeDetector.detect(null, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
@@ -45,7 +47,7 @@ class DocumentTypeDetectorTest {
         assertNull(DocumentTypeDetector.detect("old.doc", "application/msword"))
         assertNull(DocumentTypeDetector.detect("sheet.xlsx", null))
         assertNull(DocumentTypeDetector.detect("slides.pptx", null))
-        assertNull(DocumentTypeDetector.detect("notes.txt", "text/plain"))
+        assertNull(DocumentTypeDetector.detect("data.csv", "text/csv"))
         assertNull(DocumentTypeDetector.detect(null, null))
     }
 

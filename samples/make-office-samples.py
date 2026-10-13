@@ -259,6 +259,11 @@ def main() -> None:
         (out_dir / name).write_bytes(data)
     # Starts like a ZIP but has no central directory.
     (out_dir / "sample-corrupt.docx").write_bytes(samples["sample.docx"][:300])
+
+    # The same text in both encodings the viewer has to tell apart.
+    text = "텍스트 샘플\n\n한글과 English, 숫자 123.\n탭\t과   여러 칸 공백은 그대로 보인다.\n<b>태그</b>도 글자 그대로 보인다.\n"
+    (out_dir / "sample-utf8.txt").write_bytes(text.encode("utf-8"))
+    (out_dir / "sample-cp949.txt").write_bytes(text.encode("cp949"))
     print("written to", out_dir)
 
 

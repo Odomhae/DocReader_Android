@@ -19,6 +19,7 @@ internal fun buildDocumentList(
         HomeTab.HWP -> storageDocuments
             .filter { it.type == DocumentType.HWP || it.type == DocumentType.HWPX }
             .sortedWith(sortOrder.comparator)
+        HomeTab.TXT -> storageDocuments.filter { it.type == DocumentType.TXT }.sortedWith(sortOrder.comparator)
         // Recency is the whole point of this tab, so the chosen sort order does not apply.
         HomeTab.RECENT -> recentDocuments
         HomeTab.FAVORITES -> favoriteDocuments.sortedWith(sortOrder.comparator)

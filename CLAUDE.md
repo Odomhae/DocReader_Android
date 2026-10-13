@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 이 프로젝트는
 
-DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX를 보기만 하는 Android 문서 뷰어이고 Google Play 출시가 목표다. 완전히 오프라인으로 동작한다. 문서는 기기 밖으로 나가지 않으며 앱에 `INTERNET` 권한이 없다.
+DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX, TXT를 보기만 하는 Android 문서 뷰어이고 Google Play 출시가 목표다. 완전히 오프라인으로 동작한다. 문서는 기기 밖으로 나가지 않으며 앱에 `INTERNET` 권한이 없다.
 
 `Guide.md`가 프로젝트의 기준 문서다. 제품 범위, 제외 항목, 설계 결정, 마일스톤 M0–M7, 코드 규칙이 들어 있으니 사소하지 않은 변경 전에는 먼저 읽는다. 마일스톤은 모두 구현됐고, 남은 일은 출시 준비와 실기기 검증이다 (`docs/release.md`에 아직 확인하지 못한 항목이 정리돼 있다).
 
@@ -32,7 +32,7 @@ export JAVA_HOME="C:/Program Files/Android/Android Studio2/jbr"
 ./gradlew :viewer:web:testDebugUnitTest --tests "*.WebViewerViewModelTest.someMethod"
 ```
 
-`:core:model`은 순수 Kotlin/JVM 모듈이라 태스크가 `testDebugUnitTest`가 아니라 `:core:model:test`다 (테스트는 아직 없다). `:viewer:hwp`, `:viewer:docx`, `:core:ui`도 테스트가 없다. 두 뷰어 모듈의 로직은 JS assets에 있어서 에뮬레이터에서만 확인할 수 있다. `MediaStoreDocumentScanner`도 실제 `MediaStore`가 필요해 단위 테스트가 없다.
+`:core:model`은 순수 Kotlin/JVM 모듈이라 태스크가 `testDebugUnitTest`가 아니라 `:core:model:test`다 (테스트는 아직 없다). `:viewer:hwp`, `:viewer:docx`, `:viewer:txt`, `:core:ui`도 테스트가 없다. 세 뷰어 모듈의 로직은 JS assets에 있어서 에뮬레이터에서만 확인할 수 있다. `MediaStoreDocumentScanner`도 실제 `MediaStore`가 필요해 단위 테스트가 없다.
 
 계측 테스트는 `:viewer:web`에만 의미 있는 것이 있다 (네트워크 차단, 대용량 파일 스트리밍).
 
@@ -69,13 +69,14 @@ python samples/make-office-samples.py samples                                # D
 :viewer:web          포맷을 모르는 WebView 호스트 + JS 브리지
 :viewer:hwp          rhwp 번들 + HWP/HWPX 뷰어 페이지
 :viewer:docx         docx-preview 번들 + DOCX 뷰어 페이지
+:viewer:txt          TXT 뷰어 페이지
 ```
 
-의존 방향은 `app → feature / viewer → core`다. feature와 viewer 모듈끼리는 서로 의존하지 않는다. 예외는 `:viewer:hwp`와 `:viewer:docx`가 `:viewer:web`에 의존하는 것 하나뿐이다.
+의존 방향은 `app → feature / viewer → core`다. feature와 viewer 모듈끼리는 서로 의존하지 않는다. 예외는 `:viewer:hwp`, `:viewer:docx`, `:viewer:txt`가 `:viewer:web`에 의존하는 것 하나뿐이다.
 
 버전은 모두 `gradle/libs.versions.toml`에 있다. DI는 Hilt + KSP, 내비게이션은 타입 세이프 Navigation Compose 라우트(`app/.../navigation/Routes.kt`)다. minSdk 26, targetSdk 36, compileSdk 37, Java 11 바이트코드. 컨벤션 플러그인이 없어서 이 값들이 모듈마다 `build.gradle.kts`에 반복돼 있으므로 바꿀 때는 전부 바꿔야 한다.
 
-모든 모듈의 assets는 하나의 네임스페이스로 합쳐진다. 그래서 모듈마다 자기 최상위 폴더 아래에만 파일을 둔다: `webhost/`(`:viewer:web`), `hwp/`, `docx/`, `licenses/`(`:feature:settings`). JS 엔진은 npm 의존성이 아니라 직접 넣은 파일이고 `package.json`은 없다. 엔진을 올리려면 파일을 손으로 교체하고 `docs/THIRD_PARTY.md`, 앱 안의 라이선스 목록, 아래에 적힌 버전을 함께 고친다.
+모든 모듈의 assets는 하나의 네임스페이스로 합쳐진다. 그래서 모듈마다 자기 최상위 폴더 아래에만 파일을 둔다: `webhost/`(`:viewer:web`), `hwp/`, `docx/`, `txt/`, `licenses/`(`:feature:settings`). JS 엔진은 npm 의존성이 아니라 직접 넣은 파일이고 `package.json`은 없다. 엔진을 올리려면 파일을 손으로 교체하고 `docs/THIRD_PARTY.md`, 앱 안의 라이선스 목록, 아래에 적힌 버전을 함께 고친다.
 
 ### 문서 열기
 
@@ -92,12 +93,12 @@ python samples/make-office-samples.py samples                                # D
 
 - `MediaStoreDocumentScanner`가 디렉터리를 훑지 않고 `MediaStore.Files`를 확장자로 한 번 조회한다. 그래서 Uri가 `content://media/external/file/<id>` 형태이고, 뷰어·최근 문서·즐겨찾기·공유가 스캔 방식과 무관하게 동작한다.
 - 권한은 `StorageAccess`가 API 수준 차이를 감춘다. API 30 이상은 `MANAGE_EXTERNAL_STORAGE`(시스템 설정의 "모든 파일에 대한 액세스" 토글), API 26–29는 `READ_EXTERNAL_STORAGE` 런타임 권한이다. API 29는 매니페스트의 `requestLegacyExternalStorage`에 의존한다.
-- 권한 요청 UI는 `feature/home/.../StorageAccessRequest.kt`에 있다. 결과를 콜백으로 받지 않는다. 홈 화면이 resume될 때마다 다시 스캔하므로(`LifecycleResumeEffect`) 설정 화면이나 권한 팝업에서 돌아오면 저절로 반영된다.
+- 권한 요청 UI는 `feature/home/.../StorageAccessRequest.kt`에 있다. API 30 이상의 설정 화면은 토글을 켜도 스스로 닫히지 않아서, 권한이 생길 때까지 지켜보다가 `finishActivity`로 닫아 앱으로 돌아온다 (그러려고 설정 화면을 `startActivityForResult`로 연다). 결과를 콜백으로 받지 않는다. 홈 화면이 resume될 때마다 다시 스캔하므로(`LifecycleResumeEffect`) 설정 화면이나 권한 팝업에서 돌아오면 저절로 반영된다.
 - 권한이 없으면 스캐너가 `ScanResult.AccessRequired`를 돌려주고 홈은 `StorageStatus.ACCESS_REQUIRED` 화면을 보여준다.
 - 한계: 시스템이 아직 색인하지 않은 파일은 목록에 나오지 않는다. `Android/data`는 이 권한으로도 읽을 수 없다.
 - 이 권한은 Play Console에서 별도 신고와 심사가 필요하다 (`docs/release.md`).
 
-### 웹 뷰어 (HWP, HWPX, DOCX)
+### 웹 뷰어 (HWP, HWPX, DOCX, TXT)
 
 네이티브 쪽은 전부 `:viewer:web`이 맡는다. 포맷 모듈은 `WebViewerConfig`(HTML 진입점의 asset 경로, 최소 WebView 메이저 버전, 페이지가 검색을 직접 처리하는지)와 자기 assets만 제공한다. 호스트는 포맷을 몰라야 한다.
 
@@ -111,6 +112,7 @@ python samples/make-office-samples.py samples                                # D
 
 - **HWP/HWPX**: `@rhwp/core` 0.8.7 (Rust → WASM, 약 12MB). WebView 96 이상이 필요하다 (WASM reference-types). 페이지를 SVG로 지연 렌더링하므로 검색을 WebView의 페이지 내 찾기가 아니라 페이지 안(`search.js`)에서 구현했다. API 28 미만에는 한글 명조 계열 폰트가 없고 줄바꿈이 실제 글리프 폭에 좌우되기 때문에 나눔명조를 번들했다. `docs/font-mapping.md` 참고.
 - **DOCX**: docx-preview 0.4.1 + JSZip (MIT로 사용). WebView 80 이상이 필요하다 (ES2020 문법). 문서 전체를 한 번에 DOM으로 렌더링하고 WebView의 페이지 내 찾기를 쓴다.
+- **TXT**: 라이브러리 없이 `TextDecoder`로 푼다. WebView 61 이상이 필요하다 (ES 모듈). 파일에 인코딩 정보가 없으므로 `txt/decode.js`가 UTF-16 BOM, 엄격한 UTF-8, 그래도 아니면 CP949(`euc-kr`) 순서로 판단한다. 쪽이 없어서 `WebViewerConfig.showPageBar`를 꺼 아래 막대를 숨기고, 그래서 읽던 위치도 복원되지 않는다.
 - 최소 WebView 버전 미만이면 로딩을 시도하지 않고 업데이트 안내와 "다른 앱으로 열기"를 보여준다. 오래된 에뮬레이터 이미지에서 HWP가 열리지 않는 것은 버그가 아니라 의도된 동작이다.
 
 ### PDF 뷰어

@@ -17,6 +17,7 @@ import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.viewer.docx.DocxViewerScreen
 import com.odom.docreader.viewer.hwp.HwpViewerScreen
 import com.odom.docreader.viewer.pdf.PdfViewerScreen
+import com.odom.docreader.viewer.txt.TxtViewerScreen
 
 /** Picks the viewer for the document's format and gives it the shared reading settings. */
 @Composable
@@ -50,6 +51,14 @@ internal fun ViewerDestination(
         )
 
         DocumentType.DOCX -> DocxViewerScreen(
+            uri = route.uri,
+            title = route.name,
+            onBack = onBack,
+            paperColor = readingSettings.paperColor,
+            onReadingSettings = onReadingSettings,
+        )
+
+        DocumentType.TXT -> TxtViewerScreen(
             uri = route.uri,
             title = route.name,
             onBack = onBack,

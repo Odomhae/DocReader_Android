@@ -73,6 +73,7 @@ dependencies {
     implementation(project(":viewer:web"))
     implementation(project(":viewer:hwp"))
     implementation(project(":viewer:docx"))
+    implementation(project(":viewer:txt"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

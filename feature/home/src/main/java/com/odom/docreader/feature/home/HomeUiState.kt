@@ -8,6 +8,7 @@ enum class HomeTab {
     PDF,
     DOCX,
     HWP,
+    TXT,
     RECENT,
     FAVORITES,
 }

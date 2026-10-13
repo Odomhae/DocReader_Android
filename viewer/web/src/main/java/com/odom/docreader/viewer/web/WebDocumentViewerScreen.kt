@@ -53,6 +53,8 @@ data class WebViewerConfig(
     val documentType: DocumentType,
     /** True if the page implements `docViewer.find` itself; otherwise WebView's find-in-page is used. */
     val pageHandlesSearch: Boolean = false,
+    /** False for a format that has no pages to move between. */
+    val showPageBar: Boolean = true,
 )
 
 @Composable
@@ -105,7 +107,7 @@ fun WebDocumentViewerScreen(
             }
         },
         bottomBar = {
-            if (uiState.status == WebViewerStatus.READY && uiState.pageCount > 0) {
+            if (config.showPageBar && uiState.status == WebViewerStatus.READY && uiState.pageCount > 0) {
                 PageBar(
                     currentPage = uiState.currentPage,
                     pageCount = uiState.pageCount,

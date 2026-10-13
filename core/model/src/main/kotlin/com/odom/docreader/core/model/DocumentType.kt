@@ -5,4 +5,5 @@ enum class DocumentType {
     DOCX,
     HWP,
     HWPX,
+    TXT,
 }

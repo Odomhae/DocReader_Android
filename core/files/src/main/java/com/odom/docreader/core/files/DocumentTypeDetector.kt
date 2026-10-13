@@ -11,6 +11,7 @@ object DocumentTypeDetector {
         "docx" to DocumentType.DOCX,
         "hwp" to DocumentType.HWP,
         "hwpx" to DocumentType.HWPX,
+        "txt" to DocumentType.TXT,
     )
 
     val extensions: Set<String> get() = typesByExtension.keys
@@ -25,6 +26,7 @@ object DocumentTypeDetector {
         "application/hwp+zip" to DocumentType.HWPX,
         "application/haansofthwpx" to DocumentType.HWPX,
         "application/vnd.hancom.hwpx" to DocumentType.HWPX,
+        "text/plain" to DocumentType.TXT,
     )
 
     private val genericMimeTypes = setOf("application/octet-stream", "*/*")
@@ -60,6 +62,7 @@ object DocumentTypeDetector {
         DocumentType.DOCX -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         DocumentType.HWP -> "application/x-hwp"
         DocumentType.HWPX -> "application/hwp+zip"
+        DocumentType.TXT -> "text/plain"
     }
 
     private fun detectBySignature(header: ByteArray): DocumentType? = when {

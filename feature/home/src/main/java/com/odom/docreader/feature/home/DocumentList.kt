@@ -84,4 +84,5 @@ private val DocumentType.labelRes: Int
         DocumentType.DOCX -> R.string.home_type_docx
         DocumentType.HWP -> R.string.home_type_hwp
         DocumentType.HWPX -> R.string.home_type_hwpx
+        DocumentType.TXT -> R.string.home_type_txt
     }

@@ -50,6 +50,13 @@ class HomeDocumentListTest {
     }
 
     @Test
+    fun txtTabShowsOnlyTextFiles() {
+        val notes = document("notes.txt", DocumentType.TXT, sizeBytes = 1, lastModified = 5)
+        val items = buildDocumentList(HomeTab.TXT, "", SortOrder.NAME, folder + notes, emptyList(), emptyList())
+        assertEquals(listOf("notes.txt"), items.map { it.file.name })
+    }
+
+    @Test
     fun hwpTabIncludesHwpx() {
         assertEquals(listOf("charlie.hwp", "delta.hwpx"), names(tab = HomeTab.HWP))
     }

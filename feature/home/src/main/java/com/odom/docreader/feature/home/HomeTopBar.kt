@@ -112,6 +112,7 @@ private val HomeTab.labelRes: Int
         HomeTab.PDF -> R.string.home_tab_pdf
         HomeTab.DOCX -> R.string.home_tab_docx
         HomeTab.HWP -> R.string.home_tab_hwp
+        HomeTab.TXT -> R.string.home_tab_txt
         HomeTab.RECENT -> R.string.home_tab_recent
         HomeTab.FAVORITES -> R.string.home_tab_favorites
     }

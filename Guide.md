@@ -6,7 +6,7 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 ## 1. 제품 범위
 
 ### 1차 출시에 포함
-- 지원 포맷: PDF, DOCX, HWP, HWPX
+- 지원 포맷: PDF, DOCX, HWP, HWPX, TXT
 - 홈 화면: 전체/포맷별 탭, 최근 본 문서, 즐겨찾기, 파일명 검색, 정렬(이름/날짜/크기)
 - 뷰어 공통: 확대/축소, 페이지 이동(이전/다음, 쪽 번호를 수정해 바로 이동), 문서 내 텍스트 검색, 공유, 읽기 설정(종이색 흰색/세피아, 화면 밝기)
 - 다른 앱에서 "연결 프로그램"으로 열기 (ACTION_VIEW 인텐트 필터)
@@ -61,10 +61,11 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 :viewer:web          공용 WebView 호스트, JS 브리지
 :viewer:hwp          rhwp 번들, HWP 뷰어 화면
 :viewer:docx         DOCX 렌더러 번들, DOCX 뷰어 화면
+:viewer:txt          TXT 뷰어 화면
 ```
 
 의존 방향: `app → feature / viewer → core`. feature와 viewer 모듈끼리는 서로 의존하지 않는다.
-`:viewer:hwp`와 `:viewer:docx`만 `:viewer:web`에 의존한다.
+`:viewer:hwp`, `:viewer:docx`, `:viewer:txt`만 `:viewer:web`에 의존한다.
 
 ## 4. 핵심 설계 결정
 
