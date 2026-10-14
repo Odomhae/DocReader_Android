@@ -2,5 +2,8 @@
 <resources>
 
     <!-- Material3 parent because androidx.pdf's views (search bar, password dialog) need it. -->
-    <style name="Theme.DocReader" parent="Theme.Material3.Light.NoActionBar" />
+    <style name="Theme.DocReader" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Those views take their accent from here, not from the Compose theme. -->
+        <item name="colorPrimary">@color/brand_teal</item>
+    </style>
 </resources>
