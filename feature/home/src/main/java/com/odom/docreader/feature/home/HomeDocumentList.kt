@@ -1,32 +1,27 @@
 package com.odom.docreader.feature.home
 
 import com.odom.docreader.core.model.DocumentFile
-import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.core.model.SortOrder
 
 internal fun buildDocumentList(
-    tab: HomeTab,
+    format: FormatFilter?,
+    collection: CollectionFilter?,
     query: String,
     sortOrder: SortOrder,
     storageDocuments: List<DocumentFile>,
     recentDocuments: List<DocumentFile>,
     favoriteDocuments: List<DocumentFile>,
 ): List<DocumentListItem> {
-    val documents = when (tab) {
-        HomeTab.ALL -> storageDocuments.sortedWith(sortOrder.comparator)
-        HomeTab.PDF -> storageDocuments.filter { it.type == DocumentType.PDF }.sortedWith(sortOrder.comparator)
-        HomeTab.DOCX -> storageDocuments.filter { it.type == DocumentType.DOCX }.sortedWith(sortOrder.comparator)
-        HomeTab.HWP -> storageDocuments
-            .filter { it.type == DocumentType.HWP || it.type == DocumentType.HWPX }
-            .sortedWith(sortOrder.comparator)
-        HomeTab.TXT -> storageDocuments.filter { it.type == DocumentType.TXT }.sortedWith(sortOrder.comparator)
-        // Recency is the whole point of this tab, so the chosen sort order does not apply.
-        HomeTab.RECENT -> recentDocuments
-        HomeTab.FAVORITES -> favoriteDocuments.sortedWith(sortOrder.comparator)
+    val documents = when (collection) {
+        null -> storageDocuments.sortedWith(sortOrder.comparator)
+        // Recency is the whole point of this filter, so the chosen sort order does not apply.
+        CollectionFilter.RECENT -> recentDocuments
+        CollectionFilter.FAVORITES -> favoriteDocuments.sortedWith(sortOrder.comparator)
     }
     val trimmedQuery = query.trim()
     val favoriteUris = favoriteDocuments.mapTo(HashSet()) { it.uri }
     return documents
+        .filter { format == null || it.type in format.types }
         .filter { trimmedQuery.isEmpty() || it.name.contains(trimmedQuery, ignoreCase = true) }
         .map { DocumentListItem(file = it, isFavorite = it.uri in favoriteUris) }
 }

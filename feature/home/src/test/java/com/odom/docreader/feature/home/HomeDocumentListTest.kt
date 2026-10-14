@@ -15,15 +15,16 @@ class HomeDocumentListTest {
     private val folder = listOf(delta, charlie, bravo, alpha)
 
     private fun names(
-        tab: HomeTab = HomeTab.ALL,
+        format: FormatFilter? = null,
+        collection: CollectionFilter? = null,
         query: String = "",
         sortOrder: SortOrder = SortOrder.NAME,
         recent: List<DocumentFile> = emptyList(),
         favorites: List<DocumentFile> = emptyList(),
-    ) = buildDocumentList(tab, query, sortOrder, folder, recent, favorites).map { it.file.name }
+    ) = buildDocumentList(format, collection, query, sortOrder, folder, recent, favorites).map { it.file.name }
 
     @Test
-    fun sortsByNameIgnoringCase() {
+    fun noFilterListsEveryDocument() {
         assertEquals(listOf("alpha.pdf", "Bravo.docx", "charlie.hwp", "delta.hwpx"), names())
     }
 
@@ -44,21 +45,21 @@ class HomeDocumentListTest {
     }
 
     @Test
-    fun formatTabsFilterByType() {
-        assertEquals(listOf("alpha.pdf"), names(tab = HomeTab.PDF))
-        assertEquals(listOf("Bravo.docx"), names(tab = HomeTab.DOCX))
+    fun formatFilterKeepsOnlyThatType() {
+        assertEquals(listOf("alpha.pdf"), names(format = FormatFilter.PDF))
+        assertEquals(listOf("Bravo.docx"), names(format = FormatFilter.DOCX))
     }
 
     @Test
-    fun txtTabShowsOnlyTextFiles() {
+    fun txtFilterShowsOnlyTextFiles() {
         val notes = document("notes.txt", DocumentType.TXT, sizeBytes = 1, lastModified = 5)
-        val items = buildDocumentList(HomeTab.TXT, "", SortOrder.NAME, folder + notes, emptyList(), emptyList())
+        val items = buildDocumentList(FormatFilter.TXT, null, "", SortOrder.NAME, folder + notes, emptyList(), emptyList())
         assertEquals(listOf("notes.txt"), items.map { it.file.name })
     }
 
     @Test
-    fun hwpTabIncludesHwpx() {
-        assertEquals(listOf("charlie.hwp", "delta.hwpx"), names(tab = HomeTab.HWP))
+    fun hwpFilterIncludesHwpx() {
+        assertEquals(listOf("charlie.hwp", "delta.hwpx"), names(format = FormatFilter.HWP))
     }
 
     @Test
@@ -69,25 +70,38 @@ class HomeDocumentListTest {
     }
 
     @Test
-    fun recentTabKeepsRecencyOrderRegardlessOfSort() {
+    fun recentKeepsRecencyOrderRegardlessOfSort() {
         assertEquals(
             listOf("charlie.hwp", "alpha.pdf"),
-            names(tab = HomeTab.RECENT, sortOrder = SortOrder.NAME, recent = listOf(charlie, alpha)),
+            names(collection = CollectionFilter.RECENT, sortOrder = SortOrder.NAME, recent = listOf(charlie, alpha)),
         )
     }
 
     @Test
-    fun favoritesTabUsesTheSortOrderAndTheQuery() {
+    fun favoritesUseTheSortOrderAndTheQuery() {
+        val favorites = listOf(delta, alpha)
+        assertEquals(listOf("alpha.pdf", "delta.hwpx"), names(collection = CollectionFilter.FAVORITES, favorites = favorites))
         assertEquals(
-            listOf("alpha.pdf", "delta.hwpx"),
-            names(tab = HomeTab.FAVORITES, favorites = listOf(delta, alpha)),
+            listOf("delta.hwpx"),
+            names(collection = CollectionFilter.FAVORITES, query = "del", favorites = favorites),
         )
-        assertEquals(listOf("delta.hwpx"), names(tab = HomeTab.FAVORITES, query = "del", favorites = listOf(delta, alpha)))
+    }
+
+    @Test
+    fun formatFilterCombinesWithCollections() {
+        assertEquals(
+            listOf("delta.hwpx"),
+            names(format = FormatFilter.HWP, collection = CollectionFilter.FAVORITES, favorites = listOf(delta, alpha)),
+        )
+        assertEquals(
+            listOf("alpha.pdf"),
+            names(format = FormatFilter.PDF, collection = CollectionFilter.RECENT, recent = listOf(charlie, alpha)),
+        )
     }
 
     @Test
     fun favoriteFlagIsSetFromTheFavoritesList() {
-        val items = buildDocumentList(HomeTab.ALL, "", SortOrder.NAME, folder, emptyList(), listOf(charlie))
+        val items = buildDocumentList(null, null, "", SortOrder.NAME, folder, emptyList(), listOf(charlie))
 
         assertEquals(listOf("charlie.hwp"), items.filter { it.isFavorite }.map { it.file.name })
     }

@@ -40,7 +40,8 @@ fun HomeScreen(
         onOpenSettings = onOpenSettings,
         onQueryChanged = viewModel::onQueryChanged,
         onSortOrderSelected = viewModel::onSortOrderSelected,
-        onTabSelected = viewModel::onTabSelected,
+        onFormatFilterToggled = viewModel::onFormatFilterToggled,
+        onCollectionFilterToggled = viewModel::onCollectionFilterToggled,
         onToggleFavorite = viewModel::onToggleFavorite,
         onOpenDocument = { document ->
             viewModel.onDocumentOpened(document)
@@ -57,46 +58,51 @@ internal fun HomeContent(
     onOpenSettings: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onSortOrderSelected: (SortOrder) -> Unit,
-    onTabSelected: (HomeTab) -> Unit,
+    onFormatFilterToggled: (FormatFilter) -> Unit,
+    onCollectionFilterToggled: (CollectionFilter) -> Unit,
     onToggleFavorite: (DocumentListItem) -> Unit,
     onOpenDocument: (DocumentFile) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            HomeTopBar(
+    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            // Shown in every state so that settings stays reachable before access is granted.
+            HomeSearchBar(
+                query = uiState.query,
+                onQueryChanged = onQueryChanged,
                 sortOrder = uiState.sortOrder,
                 onSortOrderSelected = onSortOrderSelected,
                 onOpenSettings = onOpenSettings,
+                enabled = uiState.storageStatus == StorageStatus.READY,
             )
-        },
-    ) { innerPadding ->
-        val contentModifier = Modifier.fillMaxSize().padding(innerPadding)
-        when (uiState.storageStatus) {
-            StorageStatus.ACCESS_REQUIRED -> EmptyState(
-                title = stringResource(R.string.home_access_required_title),
-                message = stringResource(R.string.home_access_required_message),
-                actionLabel = stringResource(R.string.home_grant_access),
-                onAction = onGrantAccess,
-                modifier = contentModifier,
-            )
+            when (uiState.storageStatus) {
+                StorageStatus.ACCESS_REQUIRED -> EmptyState(
+                    title = stringResource(R.string.home_access_required_title),
+                    message = stringResource(R.string.home_access_required_message),
+                    actionLabel = stringResource(R.string.home_grant_access),
+                    onAction = onGrantAccess,
+                )
 
-            StorageStatus.LOADING -> Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+                StorageStatus.LOADING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
 
-            StorageStatus.READY -> Column(modifier = contentModifier) {
-                HomeSearchField(query = uiState.query, onQueryChanged = onQueryChanged)
-                HomeTabRow(selectedTab = uiState.selectedTab, onTabSelected = onTabSelected)
-                if (uiState.documents.isEmpty()) {
-                    EmptyState(message = emptyMessage(uiState))
-                } else {
-                    DocumentList(
-                        documents = uiState.documents,
-                        onToggleFavorite = onToggleFavorite,
-                        onOpenDocument = onOpenDocument,
+                StorageStatus.READY -> {
+                    HomeFilterChips(
+                        formatFilter = uiState.formatFilter,
+                        collectionFilter = uiState.collectionFilter,
+                        onFormatFilterToggled = onFormatFilterToggled,
+                        onCollectionFilterToggled = onCollectionFilterToggled,
                     )
+                    if (uiState.documents.isEmpty()) {
+                        EmptyState(message = emptyMessage(uiState))
+                    } else {
+                        DocumentList(
+                            documents = uiState.documents,
+                            onToggleFavorite = onToggleFavorite,
+                            onOpenDocument = onOpenDocument,
+                        )
+                    }
                 }
             }
         }
@@ -107,8 +113,8 @@ internal fun HomeContent(
 private fun emptyMessage(uiState: HomeUiState): String = stringResource(
     when {
         uiState.query.isNotBlank() -> R.string.home_empty_search
-        uiState.selectedTab == HomeTab.RECENT -> R.string.home_empty_recent
-        uiState.selectedTab == HomeTab.FAVORITES -> R.string.home_empty_favorites
+        uiState.collectionFilter == CollectionFilter.RECENT -> R.string.home_empty_recent
+        uiState.collectionFilter == CollectionFilter.FAVORITES -> R.string.home_empty_favorites
         else -> R.string.home_empty_documents
     },
 )

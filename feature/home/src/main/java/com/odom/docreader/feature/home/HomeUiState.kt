@@ -1,14 +1,19 @@
 package com.odom.docreader.feature.home
 
 import com.odom.docreader.core.model.DocumentFile
+import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.core.model.SortOrder
 
-enum class HomeTab {
-    ALL,
-    PDF,
-    DOCX,
-    HWP,
-    TXT,
+/** First chip row. No chip selected means every format. */
+enum class FormatFilter(val types: Set<DocumentType>) {
+    PDF(setOf(DocumentType.PDF)),
+    DOCX(setOf(DocumentType.DOCX)),
+    HWP(setOf(DocumentType.HWP, DocumentType.HWPX)),
+    TXT(setOf(DocumentType.TXT)),
+}
+
+/** Second chip row. No chip selected means every document on the device. */
+enum class CollectionFilter {
     RECENT,
     FAVORITES,
 }
@@ -28,9 +33,10 @@ data class DocumentListItem(
 
 data class HomeUiState(
     val storageStatus: StorageStatus = StorageStatus.LOADING,
-    val selectedTab: HomeTab = HomeTab.ALL,
+    val formatFilter: FormatFilter? = null,
+    val collectionFilter: CollectionFilter? = null,
     val query: String = "",
     val sortOrder: SortOrder = SortOrder.NAME,
-    /** Already filtered and ordered for [selectedTab], [query] and [sortOrder]. */
+    /** Already filtered and ordered for the filters, [query] and [sortOrder]. */
     val documents: List<DocumentListItem> = emptyList(),
 )

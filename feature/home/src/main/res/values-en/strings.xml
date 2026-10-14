@@ -1,14 +1,12 @@
 <resources>
-    <string name="home_title">Documents</string>
     <string name="home_search_hint">Search by file name</string>
     <string name="home_clear_search">Clear search</string>
     <string name="home_sort">Sort</string>
     <string name="home_sort_name">Name</string>
     <string name="home_sort_date">Date</string>
     <string name="home_sort_size">Size</string>
-    <string name="home_tab_all">All</string>
-    <string name="home_tab_recent">Recent</string>
-    <string name="home_tab_favorites">Favorites</string>
+    <string name="home_filter_recent">Recent</string>
+    <string name="home_filter_favorites">Favorites</string>
     <string name="home_access_required_title">File access is needed</string>
     <string name="home_access_required_message">Allow file access to list the PDF, DOCX, HWP and HWPX files stored on this device. Documents never leave the device.</string>
     <string name="home_grant_access">Allow access</string>

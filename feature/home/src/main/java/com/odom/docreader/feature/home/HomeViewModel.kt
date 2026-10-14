@@ -26,25 +26,27 @@ class HomeViewModel @Inject constructor(
     private val libraryRepository: LibraryRepository,
 ) : ViewModel() {
 
-    private val selectedTab = MutableStateFlow(HomeTab.ALL)
+    private val filters = MutableStateFlow(Filters())
     private val query = MutableStateFlow("")
     private val storageContent = MutableStateFlow<StorageContent>(StorageContent.Loading)
     private val refreshRequests = MutableStateFlow(0)
 
     val uiState: StateFlow<HomeUiState> = combine(
         storageContent,
-        selectedTab,
+        filters,
         query,
         settingsRepository.sortOrder,
         combine(libraryRepository.recentDocuments, libraryRepository.favoriteDocuments, ::Pair),
-    ) { content, tab, query, sortOrder, (recentDocuments, favoriteDocuments) ->
+    ) { content, filters, query, sortOrder, (recentDocuments, favoriteDocuments) ->
         HomeUiState(
             storageStatus = content.status,
-            selectedTab = tab,
+            formatFilter = filters.format,
+            collectionFilter = filters.collection,
             query = query,
             sortOrder = sortOrder,
             documents = buildDocumentList(
-                tab = tab,
+                format = filters.format,
+                collection = filters.collection,
                 query = query,
                 sortOrder = sortOrder,
                 storageDocuments = (content as? StorageContent.Loaded)?.documents.orEmpty(),
@@ -65,8 +67,15 @@ class HomeViewModel @Inject constructor(
         refreshRequests.update { it + 1 }
     }
 
-    fun onTabSelected(tab: HomeTab) {
-        selectedTab.value = tab
+    /** Selecting the chip that is already on turns it off again. */
+    fun onFormatFilterToggled(format: FormatFilter) {
+        filters.update { current -> current.copy(format = if (current.format == format) null else format) }
+    }
+
+    fun onCollectionFilterToggled(collection: CollectionFilter) {
+        filters.update { current ->
+            current.copy(collection = if (current.collection == collection) null else collection)
+        }
     }
 
     fun onQueryChanged(query: String) {
@@ -92,6 +101,8 @@ class HomeViewModel @Inject constructor(
             ScanResult.AccessRequired -> StorageContent.AccessRequired
         }
     }
+
+    private data class Filters(val format: FormatFilter? = null, val collection: CollectionFilter? = null)
 
     private sealed interface StorageContent {
         val status: StorageStatus

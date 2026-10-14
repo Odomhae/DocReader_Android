@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -104,30 +105,60 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun tabQueryAndSortAreReflectedInTheState() = runTest {
+    fun filtersQueryAndSortAreReflectedInTheState() = runTest {
         scanner.result = ScanResult.Success(listOf(pdf, hwp))
         val viewModel = createViewModel()
 
-        viewModel.onTabSelected(HomeTab.HWP)
+        viewModel.onFormatFilterToggled(FormatFilter.HWP)
+        viewModel.onCollectionFilterToggled(CollectionFilter.RECENT)
         viewModel.onQueryChanged("b")
         viewModel.onSortOrderSelected(SortOrder.SIZE)
 
         val state = viewModel.uiState.value
-        assertEquals(HomeTab.HWP, state.selectedTab)
+        assertEquals(FormatFilter.HWP, state.formatFilter)
+        assertEquals(CollectionFilter.RECENT, state.collectionFilter)
         assertEquals("b", state.query)
         assertEquals(SortOrder.SIZE, state.sortOrder)
-        assertEquals(listOf("b.hwp"), state.documents.map { it.file.name })
     }
 
     @Test
-    fun togglingFavoriteUpdatesTheListAndTheFavoritesTab() = runTest {
+    fun selectingAnotherChipInARowReplacesTheFirst() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onFormatFilterToggled(FormatFilter.PDF)
+        viewModel.onFormatFilterToggled(FormatFilter.HWP)
+        viewModel.onCollectionFilterToggled(CollectionFilter.RECENT)
+        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
+
+        assertEquals(FormatFilter.HWP, viewModel.uiState.value.formatFilter)
+        assertEquals(CollectionFilter.FAVORITES, viewModel.uiState.value.collectionFilter)
+    }
+
+    @Test
+    fun selectingTheActiveChipAgainTurnsItOff() = runTest {
+        scanner.result = ScanResult.Success(listOf(pdf, hwp))
+        val viewModel = createViewModel()
+
+        viewModel.onFormatFilterToggled(FormatFilter.HWP)
+        assertEquals(listOf("b.hwp"), viewModel.uiState.value.documents.map { it.file.name })
+        viewModel.onFormatFilterToggled(FormatFilter.HWP)
+        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
+        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
+
+        assertNull(viewModel.uiState.value.formatFilter)
+        assertNull(viewModel.uiState.value.collectionFilter)
+        assertEquals(listOf("a.pdf", "b.hwp"), viewModel.uiState.value.documents.map { it.file.name })
+    }
+
+    @Test
+    fun togglingFavoriteUpdatesTheListAndTheFavoritesFilter() = runTest {
         scanner.result = ScanResult.Success(listOf(pdf, hwp))
         val viewModel = createViewModel()
 
         viewModel.onToggleFavorite(viewModel.uiState.value.documents.first { it.file == hwp })
 
         assertEquals(listOf("b.hwp"), viewModel.uiState.value.documents.filter { it.isFavorite }.map { it.file.name })
-        viewModel.onTabSelected(HomeTab.FAVORITES)
+        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
         assertEquals(listOf("b.hwp"), viewModel.uiState.value.documents.map { it.file.name })
 
         viewModel.onToggleFavorite(viewModel.uiState.value.documents.single())
@@ -135,13 +166,13 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun openedDocumentsAppearInTheRecentTabNewestFirst() = runTest {
+    fun openedDocumentsAppearUnderRecentNewestFirst() = runTest {
         scanner.result = ScanResult.Success(listOf(pdf, hwp))
         val viewModel = createViewModel()
 
         viewModel.onDocumentOpened(pdf)
         viewModel.onDocumentOpened(hwp)
-        viewModel.onTabSelected(HomeTab.RECENT)
+        viewModel.onCollectionFilterToggled(CollectionFilter.RECENT)
 
         assertEquals(listOf("b.hwp", "a.pdf"), viewModel.uiState.value.documents.map { it.file.name })
     }
