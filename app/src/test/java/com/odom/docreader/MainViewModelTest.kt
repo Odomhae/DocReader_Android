@@ -116,12 +116,9 @@ class MainViewModelTest {
     private class FakeLibraryRepository : LibraryRepository {
         val opened = mutableListOf<DocumentFile>()
         override val recentDocuments: Flow<List<RecentDocument>> = flowOf(emptyList())
-        override val favoriteDocuments: Flow<List<DocumentFile>> = flowOf(emptyList())
 
         override suspend fun markOpened(document: DocumentFile) {
             opened += document
         }
-
-        override suspend fun setFavorite(document: DocumentFile, favorite: Boolean) = Unit
     }
 }

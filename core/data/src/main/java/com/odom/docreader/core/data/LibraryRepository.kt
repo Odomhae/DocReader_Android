@@ -16,11 +16,7 @@ interface LibraryRepository {
     /** Most recently opened first. */
     val recentDocuments: Flow<List<RecentDocument>>
 
-    val favoriteDocuments: Flow<List<DocumentFile>>
-
     suspend fun markOpened(document: DocumentFile)
-
-    suspend fun setFavorite(document: DocumentFile, favorite: Boolean)
 }
 
 class RoomLibraryRepository @Inject constructor(
@@ -30,39 +26,21 @@ class RoomLibraryRepository @Inject constructor(
 
     override val recentDocuments: Flow<List<RecentDocument>> =
         documentDao.observeRecent(RECENT_LIMIT).map { entities ->
-            entities.mapNotNull { entity ->
-                val openedAt = entity.lastOpenedAt ?: return@mapNotNull null
-                entity.toDocumentFile()?.let { RecentDocument(it, openedAt) }
-            }
+            entities.mapNotNull { entity -> entity.toDocumentFile()?.let { RecentDocument(it, entity.lastOpenedAt) } }
         }
-
-    override val favoriteDocuments: Flow<List<DocumentFile>> =
-        documentDao.observeFavorites().map { entities -> entities.mapNotNull { it.toDocumentFile() } }
 
     override suspend fun markOpened(document: DocumentFile) {
-        val isFavorite = documentDao.find(document.uri)?.isFavorite ?: false
-        documentDao.upsert(document.toEntity(lastOpenedAt = clock.millis(), isFavorite = isFavorite))
+        documentDao.upsert(
+            DocumentEntity(
+                uri = document.uri,
+                name = document.name,
+                type = document.type.name,
+                sizeBytes = document.sizeBytes,
+                lastModified = document.lastModified,
+                lastOpenedAt = clock.millis(),
+            ),
+        )
     }
-
-    override suspend fun setFavorite(document: DocumentFile, favorite: Boolean) {
-        val lastOpenedAt = documentDao.find(document.uri)?.lastOpenedAt
-        if (!favorite && lastOpenedAt == null) {
-            // Neither recent nor favourite any more, so nothing is left to remember.
-            documentDao.delete(document.uri)
-        } else {
-            documentDao.upsert(document.toEntity(lastOpenedAt = lastOpenedAt, isFavorite = favorite))
-        }
-    }
-
-    private fun DocumentFile.toEntity(lastOpenedAt: Long?, isFavorite: Boolean) = DocumentEntity(
-        uri = uri,
-        name = name,
-        type = type.name,
-        sizeBytes = sizeBytes,
-        lastModified = lastModified,
-        lastOpenedAt = lastOpenedAt,
-        isFavorite = isFavorite,
-    )
 
     // A row written by a build that knew a format this build does not is skipped, not a crash.
     private fun DocumentEntity.toDocumentFile(): DocumentFile? {

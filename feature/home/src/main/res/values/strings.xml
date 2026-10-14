@@ -6,7 +6,6 @@
     <string name="home_sort_date">날짜</string>
     <string name="home_sort_size">크기</string>
     <string name="home_filter_recent">최근</string>
-    <string name="home_filter_favorites">즐겨찾기</string>
     <string name="home_access_required_title">파일 접근 권한이 필요합니다</string>
     <string name="home_access_required_message">기기에 저장된 PDF, DOCX, HWP, HWPX, TXT 파일을 목록에 표시하려면 파일 접근을 허용해 주세요.</string>
     <string name="home_access_privacy">문서는 기기 밖으로 전송되지 않습니다.</string>
@@ -14,9 +13,6 @@
     <string name="home_empty_documents">기기에 지원하는 문서가 없습니다.</string>
     <string name="home_empty_search">검색 결과가 없습니다.</string>
     <string name="home_empty_recent">최근 본 문서가 없습니다.</string>
-    <string name="home_empty_favorites">즐겨찾기한 문서가 없습니다.</string>
-    <string name="home_add_favorite">즐겨찾기에 추가</string>
-    <string name="home_remove_favorite">즐겨찾기에서 제거</string>
     <string name="home_type_pdf" translatable="false">PDF</string>
     <string name="home_type_docx" translatable="false">DOCX</string>
     <string name="home_type_hwp" translatable="false">HWP</string>

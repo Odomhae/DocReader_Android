@@ -4,18 +4,14 @@ import com.odom.docreader.core.model.DocumentFile
 import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.core.model.SortOrder
 
-/** First chip row. No chip selected means every format. */
-enum class FormatFilter(val types: Set<DocumentType>) {
+/** The chip row; at most one is on. No chip selected means every document on the device. */
+enum class HomeFilter(val types: Set<DocumentType>) {
+    /** Documents the user opened, any format. */
+    RECENT(DocumentType.entries.toSet()),
     PDF(setOf(DocumentType.PDF)),
     DOCX(setOf(DocumentType.DOCX)),
     HWP(setOf(DocumentType.HWP, DocumentType.HWPX)),
     TXT(setOf(DocumentType.TXT)),
-}
-
-/** Second chip row. No chip selected means every document on the device. */
-enum class CollectionFilter {
-    RECENT,
-    FAVORITES,
 }
 
 enum class StorageStatus {
@@ -28,17 +24,15 @@ enum class StorageStatus {
 
 data class DocumentListItem(
     val file: DocumentFile,
-    val isFavorite: Boolean,
     /** When the document was last opened, set only while the recent list is shown. Epoch milliseconds. */
     val openedAt: Long? = null,
 )
 
 data class HomeUiState(
     val storageStatus: StorageStatus = StorageStatus.LOADING,
-    val formatFilter: FormatFilter? = null,
-    val collectionFilter: CollectionFilter? = null,
+    val filter: HomeFilter? = null,
     val query: String = "",
     val sortOrder: SortOrder = SortOrder.NAME,
-    /** Already filtered and ordered for the filters, [query] and [sortOrder]. */
+    /** Already filtered and ordered for [filter], [query] and [sortOrder]. */
     val documents: List<DocumentListItem> = emptyList(),
 )

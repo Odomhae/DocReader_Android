@@ -7,6 +7,7 @@ import com.odom.docreader.core.files.DocumentScanner
 import com.odom.docreader.core.files.ScanResult
 import com.odom.docreader.core.model.DocumentFile
 import com.odom.docreader.core.model.DocumentType
+import com.odom.docreader.core.model.FontScale
 import com.odom.docreader.core.model.SortOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -106,33 +107,28 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun filtersQueryAndSortAreReflectedInTheState() = runTest {
+    fun filterQueryAndSortAreReflectedInTheState() = runTest {
         scanner.result = ScanResult.Success(listOf(pdf, hwp))
         val viewModel = createViewModel()
 
-        viewModel.onFormatFilterToggled(FormatFilter.HWP)
-        viewModel.onCollectionFilterToggled(CollectionFilter.RECENT)
+        viewModel.onFilterToggled(HomeFilter.HWP)
         viewModel.onQueryChanged("b")
         viewModel.onSortOrderSelected(SortOrder.SIZE)
 
         val state = viewModel.uiState.value
-        assertEquals(FormatFilter.HWP, state.formatFilter)
-        assertEquals(CollectionFilter.RECENT, state.collectionFilter)
+        assertEquals(HomeFilter.HWP, state.filter)
         assertEquals("b", state.query)
         assertEquals(SortOrder.SIZE, state.sortOrder)
     }
 
     @Test
-    fun selectingAnotherChipInARowReplacesTheFirst() = runTest {
+    fun selectingAnotherChipReplacesTheFirst() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.onFormatFilterToggled(FormatFilter.PDF)
-        viewModel.onFormatFilterToggled(FormatFilter.HWP)
-        viewModel.onCollectionFilterToggled(CollectionFilter.RECENT)
-        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
+        viewModel.onFilterToggled(HomeFilter.PDF)
+        viewModel.onFilterToggled(HomeFilter.RECENT)
 
-        assertEquals(FormatFilter.HWP, viewModel.uiState.value.formatFilter)
-        assertEquals(CollectionFilter.FAVORITES, viewModel.uiState.value.collectionFilter)
+        assertEquals(HomeFilter.RECENT, viewModel.uiState.value.filter)
     }
 
     @Test
@@ -140,30 +136,12 @@ class HomeViewModelTest {
         scanner.result = ScanResult.Success(listOf(pdf, hwp))
         val viewModel = createViewModel()
 
-        viewModel.onFormatFilterToggled(FormatFilter.HWP)
+        viewModel.onFilterToggled(HomeFilter.HWP)
         assertEquals(listOf("b.hwp"), viewModel.uiState.value.documents.map { it.file.name })
-        viewModel.onFormatFilterToggled(FormatFilter.HWP)
-        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
-        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
+        viewModel.onFilterToggled(HomeFilter.HWP)
 
-        assertNull(viewModel.uiState.value.formatFilter)
-        assertNull(viewModel.uiState.value.collectionFilter)
+        assertNull(viewModel.uiState.value.filter)
         assertEquals(listOf("a.pdf", "b.hwp"), viewModel.uiState.value.documents.map { it.file.name })
-    }
-
-    @Test
-    fun togglingFavoriteUpdatesTheListAndTheFavoritesFilter() = runTest {
-        scanner.result = ScanResult.Success(listOf(pdf, hwp))
-        val viewModel = createViewModel()
-
-        viewModel.onToggleFavorite(viewModel.uiState.value.documents.first { it.file == hwp })
-
-        assertEquals(listOf("b.hwp"), viewModel.uiState.value.documents.filter { it.isFavorite }.map { it.file.name })
-        viewModel.onCollectionFilterToggled(CollectionFilter.FAVORITES)
-        assertEquals(listOf("b.hwp"), viewModel.uiState.value.documents.map { it.file.name })
-
-        viewModel.onToggleFavorite(viewModel.uiState.value.documents.single())
-        assertTrue(viewModel.uiState.value.documents.isEmpty())
     }
 
     @Test
@@ -173,7 +151,7 @@ class HomeViewModelTest {
 
         viewModel.onDocumentOpened(pdf)
         viewModel.onDocumentOpened(hwp)
-        viewModel.onCollectionFilterToggled(CollectionFilter.RECENT)
+        viewModel.onFilterToggled(HomeFilter.RECENT)
 
         assertEquals(listOf("b.hwp", "a.pdf"), viewModel.uiState.value.documents.map { it.file.name })
     }
@@ -189,26 +167,25 @@ class HomeViewModelTest {
 
     private class FakeSettingsRepository : SettingsRepository {
         override val sortOrder = MutableStateFlow(SortOrder.NAME)
+        override val fontScale = MutableStateFlow(FontScale.NORMAL)
 
         override suspend fun setSortOrder(sortOrder: SortOrder) {
             this.sortOrder.value = sortOrder
+        }
+
+        override suspend fun setFontScale(fontScale: FontScale) {
+            this.fontScale.value = fontScale
         }
     }
 
     private class FakeLibraryRepository : LibraryRepository {
         override val recentDocuments = MutableStateFlow<List<RecentDocument>>(emptyList())
-        override val favoriteDocuments = MutableStateFlow<List<DocumentFile>>(emptyList())
         private var now = 0L
 
         override suspend fun markOpened(document: DocumentFile) {
             now += 1
             recentDocuments.value =
                 listOf(RecentDocument(document, openedAt = now)) + recentDocuments.value.filter { it.file != document }
-        }
-
-        override suspend fun setFavorite(document: DocumentFile, favorite: Boolean) {
-            favoriteDocuments.value =
-                if (favorite) favoriteDocuments.value + document else favoriteDocuments.value - document
         }
     }
 }

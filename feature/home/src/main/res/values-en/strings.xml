@@ -6,7 +6,6 @@
     <string name="home_sort_date">Date</string>
     <string name="home_sort_size">Size</string>
     <string name="home_filter_recent">Recent</string>
-    <string name="home_filter_favorites">Favorites</string>
     <string name="home_access_required_title">File access is needed</string>
     <string name="home_access_required_message">Allow file access to list the PDF, DOCX, HWP, HWPX and TXT files stored on this device.</string>
     <string name="home_access_privacy">Documents never leave the device.</string>
@@ -14,9 +13,6 @@
     <string name="home_empty_documents">No supported documents on this device.</string>
     <string name="home_empty_search">No results.</string>
     <string name="home_empty_recent">No recently opened documents.</string>
-    <string name="home_empty_favorites">No favorite documents.</string>
-    <string name="home_add_favorite">Add to favorites</string>
-    <string name="home_remove_favorite">Remove from favorites</string>
     <string name="home_opened_just_now">Just now</string>
     <string name="home_settings">Settings</string>
 </resources>

@@ -98,33 +98,23 @@ private fun SortMenuButton(sortOrder: SortOrder, onSortOrderSelected: (SortOrder
 }
 
 @Composable
-internal fun HomeFilterChips(
-    formatFilter: FormatFilter?,
-    collectionFilter: CollectionFilter?,
-    onFormatFilterToggled: (FormatFilter) -> Unit,
-    onCollectionFilterToggled: (CollectionFilter) -> Unit,
-) {
+internal fun HomeFilterChips(filter: HomeFilter?, onFilterToggled: (HomeFilter) -> Unit) {
     ChipRow {
-        FormatFilter.entries.forEach { format ->
+        HomeFilter.entries.forEach { option ->
             FilterChip(
-                selected = format == formatFilter,
-                onClick = { onFormatFilterToggled(format) },
-                label = { Text(stringResource(format.labelRes)) },
-            )
-        }
-    }
-    ChipRow {
-        CollectionFilter.entries.forEach { collection ->
-            FilterChip(
-                selected = collection == collectionFilter,
-                onClick = { onCollectionFilterToggled(collection) },
-                label = { Text(stringResource(collection.labelRes)) },
-                leadingIcon = {
-                    Icon(
-                        painterResource(collection.iconRes),
-                        contentDescription = null,
-                        modifier = Modifier.size(FilterChipDefaults.IconSize),
-                    )
+                selected = option == filter,
+                onClick = { onFilterToggled(option) },
+                label = { Text(stringResource(option.labelRes)) },
+                leadingIcon = if (option == HomeFilter.RECENT) {
+                    {
+                        Icon(
+                            painterResource(UiR.drawable.ic_history),
+                            contentDescription = null,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                        )
+                    }
+                } else {
+                    null
                 },
             )
         }
@@ -148,22 +138,11 @@ private val SortOrder.labelRes: Int
         SortOrder.SIZE -> R.string.home_sort_size
     }
 
-private val FormatFilter.labelRes: Int
+private val HomeFilter.labelRes: Int
     get() = when (this) {
-        FormatFilter.PDF -> R.string.home_type_pdf
-        FormatFilter.DOCX -> R.string.home_type_docx
-        FormatFilter.HWP -> R.string.home_type_hwp
-        FormatFilter.TXT -> R.string.home_type_txt
-    }
-
-private val CollectionFilter.labelRes: Int
-    get() = when (this) {
-        CollectionFilter.RECENT -> R.string.home_filter_recent
-        CollectionFilter.FAVORITES -> R.string.home_filter_favorites
-    }
-
-private val CollectionFilter.iconRes: Int
-    get() = when (this) {
-        CollectionFilter.RECENT -> UiR.drawable.ic_history
-        CollectionFilter.FAVORITES -> UiR.drawable.ic_star
+        HomeFilter.RECENT -> R.string.home_filter_recent
+        HomeFilter.PDF -> R.string.home_type_pdf
+        HomeFilter.DOCX -> R.string.home_type_docx
+        HomeFilter.HWP -> R.string.home_type_hwp
+        HomeFilter.TXT -> R.string.home_type_txt
     }

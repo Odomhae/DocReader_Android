@@ -40,9 +40,7 @@ fun HomeScreen(
         onOpenSettings = onOpenSettings,
         onQueryChanged = viewModel::onQueryChanged,
         onSortOrderSelected = viewModel::onSortOrderSelected,
-        onFormatFilterToggled = viewModel::onFormatFilterToggled,
-        onCollectionFilterToggled = viewModel::onCollectionFilterToggled,
-        onToggleFavorite = viewModel::onToggleFavorite,
+        onFilterToggled = viewModel::onFilterToggled,
         onOpenDocument = { document ->
             viewModel.onDocumentOpened(document)
             onOpenDocument(document)
@@ -58,9 +56,7 @@ internal fun HomeContent(
     onOpenSettings: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onSortOrderSelected: (SortOrder) -> Unit,
-    onFormatFilterToggled: (FormatFilter) -> Unit,
-    onCollectionFilterToggled: (CollectionFilter) -> Unit,
-    onToggleFavorite: (DocumentListItem) -> Unit,
+    onFilterToggled: (HomeFilter) -> Unit,
     onOpenDocument: (DocumentFile) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -83,20 +79,11 @@ internal fun HomeContent(
                 }
 
                 StorageStatus.READY -> {
-                    HomeFilterChips(
-                        formatFilter = uiState.formatFilter,
-                        collectionFilter = uiState.collectionFilter,
-                        onFormatFilterToggled = onFormatFilterToggled,
-                        onCollectionFilterToggled = onCollectionFilterToggled,
-                    )
+                    HomeFilterChips(filter = uiState.filter, onFilterToggled = onFilterToggled)
                     if (uiState.documents.isEmpty()) {
                         EmptyState(message = emptyMessage(uiState))
                     } else {
-                        DocumentList(
-                            documents = uiState.documents,
-                            onToggleFavorite = onToggleFavorite,
-                            onOpenDocument = onOpenDocument,
-                        )
+                        DocumentList(documents = uiState.documents, onOpenDocument = onOpenDocument)
                     }
                 }
             }
@@ -108,8 +95,7 @@ internal fun HomeContent(
 private fun emptyMessage(uiState: HomeUiState): String = stringResource(
     when {
         uiState.query.isNotBlank() -> R.string.home_empty_search
-        uiState.collectionFilter == CollectionFilter.RECENT -> R.string.home_empty_recent
-        uiState.collectionFilter == CollectionFilter.FAVORITES -> R.string.home_empty_favorites
+        uiState.filter == HomeFilter.RECENT -> R.string.home_empty_recent
         else -> R.string.home_empty_documents
     },
 )

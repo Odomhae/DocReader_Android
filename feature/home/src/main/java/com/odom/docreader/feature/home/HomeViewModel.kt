@@ -26,32 +26,29 @@ class HomeViewModel @Inject constructor(
     private val libraryRepository: LibraryRepository,
 ) : ViewModel() {
 
-    private val filters = MutableStateFlow(Filters())
+    private val filter = MutableStateFlow<HomeFilter?>(null)
     private val query = MutableStateFlow("")
     private val storageContent = MutableStateFlow<StorageContent>(StorageContent.Loading)
     private val refreshRequests = MutableStateFlow(0)
 
     val uiState: StateFlow<HomeUiState> = combine(
         storageContent,
-        filters,
+        filter,
         query,
         settingsRepository.sortOrder,
-        combine(libraryRepository.recentDocuments, libraryRepository.favoriteDocuments, ::Pair),
-    ) { content, filters, query, sortOrder, (recentDocuments, favoriteDocuments) ->
+        libraryRepository.recentDocuments,
+    ) { content, filter, query, sortOrder, recentDocuments ->
         HomeUiState(
             storageStatus = content.status,
-            formatFilter = filters.format,
-            collectionFilter = filters.collection,
+            filter = filter,
             query = query,
             sortOrder = sortOrder,
             documents = buildDocumentList(
-                format = filters.format,
-                collection = filters.collection,
+                filter = filter,
                 query = query,
                 sortOrder = sortOrder,
                 storageDocuments = (content as? StorageContent.Loaded)?.documents.orEmpty(),
                 recentDocuments = recentDocuments,
-                favoriteDocuments = favoriteDocuments,
             ),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), HomeUiState())
@@ -68,14 +65,8 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Selecting the chip that is already on turns it off again. */
-    fun onFormatFilterToggled(format: FormatFilter) {
-        filters.update { current -> current.copy(format = if (current.format == format) null else format) }
-    }
-
-    fun onCollectionFilterToggled(collection: CollectionFilter) {
-        filters.update { current ->
-            current.copy(collection = if (current.collection == collection) null else collection)
-        }
+    fun onFilterToggled(filter: HomeFilter) {
+        this.filter.update { current -> if (current == filter) null else filter }
     }
 
     fun onQueryChanged(query: String) {
@@ -84,10 +75,6 @@ class HomeViewModel @Inject constructor(
 
     fun onSortOrderSelected(sortOrder: SortOrder) {
         viewModelScope.launch { settingsRepository.setSortOrder(sortOrder) }
-    }
-
-    fun onToggleFavorite(item: DocumentListItem) {
-        viewModelScope.launch { libraryRepository.setFavorite(item.file, favorite = !item.isFavorite) }
     }
 
     fun onDocumentOpened(document: DocumentFile) {
@@ -101,8 +88,6 @@ class HomeViewModel @Inject constructor(
             ScanResult.AccessRequired -> StorageContent.AccessRequired
         }
     }
-
-    private data class Filters(val format: FormatFilter? = null, val collection: CollectionFilter? = null)
 
     private sealed interface StorageContent {
         val status: StorageStatus

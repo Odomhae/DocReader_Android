@@ -16,13 +16,11 @@ class HomeDocumentListTest {
     private val folder = listOf(delta, charlie, bravo, alpha)
 
     private fun names(
-        format: FormatFilter? = null,
-        collection: CollectionFilter? = null,
+        filter: HomeFilter? = null,
         query: String = "",
         sortOrder: SortOrder = SortOrder.NAME,
         recent: List<DocumentFile> = emptyList(),
-        favorites: List<DocumentFile> = emptyList(),
-    ) = buildDocumentList(format, collection, query, sortOrder, folder, recent.asRecent(), favorites).map { it.file.name }
+    ) = buildDocumentList(filter, query, sortOrder, folder, recent.asRecent()).map { it.file.name }
 
     // Newest first, as the repository returns them.
     private fun List<DocumentFile>.asRecent() =
@@ -32,8 +30,8 @@ class HomeDocumentListTest {
     fun onlyTheRecentListCarriesTheOpenedTime() {
         val recent = listOf(charlie, alpha).asRecent()
 
-        val underRecent = buildDocumentList(null, CollectionFilter.RECENT, "", SortOrder.NAME, folder, recent, emptyList())
-        val everything = buildDocumentList(null, null, "", SortOrder.NAME, folder, recent, emptyList())
+        val underRecent = buildDocumentList(HomeFilter.RECENT, "", SortOrder.NAME, folder, recent)
+        val everything = buildDocumentList(null, "", SortOrder.NAME, folder, recent)
 
         assertEquals(listOf(1_000L, 999L), underRecent.map { it.openedAt })
         assertTrue(everything.all { it.openedAt == null })
@@ -62,20 +60,20 @@ class HomeDocumentListTest {
 
     @Test
     fun formatFilterKeepsOnlyThatType() {
-        assertEquals(listOf("alpha.pdf"), names(format = FormatFilter.PDF))
-        assertEquals(listOf("Bravo.docx"), names(format = FormatFilter.DOCX))
+        assertEquals(listOf("alpha.pdf"), names(filter = HomeFilter.PDF))
+        assertEquals(listOf("Bravo.docx"), names(filter = HomeFilter.DOCX))
     }
 
     @Test
     fun txtFilterShowsOnlyTextFiles() {
         val notes = document("notes.txt", DocumentType.TXT, sizeBytes = 1, lastModified = 5)
-        val items = buildDocumentList(FormatFilter.TXT, null, "", SortOrder.NAME, folder + notes, emptyList(), emptyList())
+        val items = buildDocumentList(HomeFilter.TXT, "", SortOrder.NAME, folder + notes, emptyList())
         assertEquals(listOf("notes.txt"), items.map { it.file.name })
     }
 
     @Test
     fun hwpFilterIncludesHwpx() {
-        assertEquals(listOf("charlie.hwp", "delta.hwpx"), names(format = FormatFilter.HWP))
+        assertEquals(listOf("charlie.hwp", "delta.hwpx"), names(filter = HomeFilter.HWP))
     }
 
     @Test
@@ -89,37 +87,13 @@ class HomeDocumentListTest {
     fun recentKeepsRecencyOrderRegardlessOfSort() {
         assertEquals(
             listOf("charlie.hwp", "alpha.pdf"),
-            names(collection = CollectionFilter.RECENT, sortOrder = SortOrder.NAME, recent = listOf(charlie, alpha)),
+            names(filter = HomeFilter.RECENT, sortOrder = SortOrder.NAME, recent = listOf(charlie, alpha)),
         )
     }
 
     @Test
-    fun favoritesUseTheSortOrderAndTheQuery() {
-        val favorites = listOf(delta, alpha)
-        assertEquals(listOf("alpha.pdf", "delta.hwpx"), names(collection = CollectionFilter.FAVORITES, favorites = favorites))
-        assertEquals(
-            listOf("delta.hwpx"),
-            names(collection = CollectionFilter.FAVORITES, query = "del", favorites = favorites),
-        )
-    }
-
-    @Test
-    fun formatFilterCombinesWithCollections() {
-        assertEquals(
-            listOf("delta.hwpx"),
-            names(format = FormatFilter.HWP, collection = CollectionFilter.FAVORITES, favorites = listOf(delta, alpha)),
-        )
-        assertEquals(
-            listOf("alpha.pdf"),
-            names(format = FormatFilter.PDF, collection = CollectionFilter.RECENT, recent = listOf(charlie, alpha)),
-        )
-    }
-
-    @Test
-    fun favoriteFlagIsSetFromTheFavoritesList() {
-        val items = buildDocumentList(null, null, "", SortOrder.NAME, folder, emptyList(), listOf(charlie))
-
-        assertEquals(listOf("charlie.hwp"), items.filter { it.isFavorite }.map { it.file.name })
+    fun recentAppliesTheQuery() {
+        assertEquals(listOf("alpha.pdf"), names(filter = HomeFilter.RECENT, query = "alp", recent = listOf(charlie, alpha)))
     }
 
     private fun document(name: String, type: DocumentType, sizeBytes: Long, lastModified: Long) =

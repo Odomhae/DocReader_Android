@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "123fec31a196be64693ca13a08c3367a",
+    "identityHash": "17a85751e94405f2881699d396c75e85",
     "entities": [
       {
         "tableName": "documents",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uri` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `lastModified` INTEGER NOT NULL, `lastOpenedAt` INTEGER, `isFavorite` INTEGER NOT NULL, PRIMARY KEY(`uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uri` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `lastModified` INTEGER NOT NULL, `lastOpenedAt` INTEGER NOT NULL, PRIMARY KEY(`uri`))",
         "fields": [
           {
             "fieldPath": "uri",
@@ -41,11 +41,6 @@
           {
             "fieldPath": "lastOpenedAt",
             "columnName": "lastOpenedAt",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "isFavorite",
-            "columnName": "isFavorite",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -60,7 +55,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '123fec31a196be64693ca13a08c3367a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '17a85751e94405f2881699d396c75e85')"
     ]
   }
 }
