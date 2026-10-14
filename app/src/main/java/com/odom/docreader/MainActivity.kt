@@ -18,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     private val viewModel: MainViewModel by viewModels()
+    private val appearanceViewModel: AppearanceViewModel by viewModels()
 
     // The app is light-only. Without this, a device in dark mode would still pick night
     // resources in androidx.pdf's views and light system bar icons in enableEdgeToEdge().
@@ -32,7 +33,8 @@ class MainActivity : FragmentActivity() {
         // On re-creation the navigation back stack already holds the document that was opened.
         if (savedInstanceState == null) handleViewIntent(intent)
         setContent {
-            DocReaderTheme {
+            val fontScale by appearanceViewModel.uiState.collectAsStateWithLifecycle()
+            DocReaderTheme(fontScaleMultiplier = fontScale.multiplier) {
                 val incomingDocument by viewModel.incomingDocument.collectAsStateWithLifecycle()
                 DocReaderNavHost(
                     incomingDocument = incomingDocument,

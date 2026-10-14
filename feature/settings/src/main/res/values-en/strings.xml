@@ -4,6 +4,12 @@
     <string name="settings_licenses">Open-source licenses</string>
     <string name="settings_licenses_summary">Open-source software and fonts included in this app</string>
     <string name="settings_version">Version</string>
+    <string name="settings_font_scale">Text size</string>
+    <string name="settings_font_scale_small">Small</string>
+    <string name="settings_font_scale_normal">Default</string>
+    <string name="settings_font_scale_large">Large</string>
+    <string name="settings_font_scale_extra_large">Extra large</string>
+    <string name="settings_font_scale_cancel">Cancel</string>
     <string name="settings_license_rhwp_crates">MIT / Apache-2.0 / BSD and compatible</string>
     <string name="settings_library_rhwp_crates">rhwp — bundled Rust crates</string>
     <string name="settings_copyright_rhwp_crates">See the list for each crate</string>

@@ -4,6 +4,12 @@
     <string name="settings_licenses">오픈소스 라이선스</string>
     <string name="settings_licenses_summary">이 앱에 포함된 오픈소스 소프트웨어와 폰트</string>
     <string name="settings_version">버전</string>
+    <string name="settings_font_scale">글씨 크기</string>
+    <string name="settings_font_scale_small">작게</string>
+    <string name="settings_font_scale_normal">보통</string>
+    <string name="settings_font_scale_large">크게</string>
+    <string name="settings_font_scale_extra_large">아주 크게</string>
+    <string name="settings_font_scale_cancel">취소</string>
     <!-- Open-source list. Product names, license names and copyright notices are shown as published. -->
     <string name="settings_library_details" translatable="false">%1$s\n%2$s</string>
     <string name="settings_license_apache_2" translatable="false">Apache License 2.0</string>

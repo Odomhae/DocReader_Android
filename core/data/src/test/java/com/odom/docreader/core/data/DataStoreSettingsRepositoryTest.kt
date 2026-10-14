@@ -1,6 +1,7 @@
 package com.odom.docreader.core.data
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.odom.docreader.core.model.FontScale
 import com.odom.docreader.core.model.SortOrder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -24,6 +25,7 @@ class DataStoreSettingsRepositoryTest {
         val repository = createRepository()
 
         assertEquals(SortOrder.NAME, repository.sortOrder.first())
+        assertEquals(FontScale.NORMAL, repository.fontScale.first())
     }
 
     @Test
@@ -31,7 +33,9 @@ class DataStoreSettingsRepositoryTest {
         val repository = createRepository()
 
         repository.setSortOrder(SortOrder.SIZE)
+        repository.setFontScale(FontScale.LARGE)
 
         assertEquals(SortOrder.SIZE, repository.sortOrder.first())
+        assertEquals(FontScale.LARGE, repository.fontScale.first())
     }
 }
