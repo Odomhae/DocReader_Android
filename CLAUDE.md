@@ -63,7 +63,7 @@ python samples/make-office-samples.py samples                                # D
 :core:data           Room(최근/즐겨찾기), DataStore(설정), 리포지토리
 :core:files          저장소 접근 권한, 파일 스캔, 포맷 판별, 공유 / 다른 앱으로 열기
 :core:ui             테마, 공용 Composable과 아이콘
-:feature:home        파일 목록, 탭, 검색, 정렬
+:feature:home        파일 목록, 필터 칩, 검색, 정렬
 :feature:settings    설정, 오픈소스 라이선스 화면
 :viewer:pdf          PDF 뷰어
 :viewer:web          포맷을 모르는 WebView 호스트 + JS 브리지
@@ -98,6 +98,13 @@ python samples/make-office-samples.py samples                                # D
 - 한계: 시스템이 아직 색인하지 않은 파일은 목록에 나오지 않는다. `Android/data`는 이 권한으로도 읽을 수 없다.
 - 이 권한은 Play Console에서 별도 신고와 심사가 필요하다 (`docs/release.md`).
 
+### 홈 화면 구성 (2026-10-14)
+
+- 제목 줄이 없다. 맨 위 줄은 검색창과 정렬·설정 버튼이고, 권한이 없을 때도 설정에 갈 수 있도록 모든 상태에서 보인다.
+- 그 아래 칩 두 줄: 포맷(PDF/DOCX/HWP/TXT, HWP 칩은 HWPX 포함)과 최근/즐겨찾기. 각 줄은 하나만 선택되고, 다시 누르면 해제된다. 두 줄은 조합되며 아무것도 고르지 않으면 기기 전체 목록이다. "전체" 칩은 일부러 없다.
+- 최근을 켜면 정렬 설정을 무시하고 연 순서로 보이며, 행에 수정일 대신 연 시각을 보여준다 (`LibraryRepository.recentDocuments`가 `RecentDocument`로 연 시각을 함께 준다).
+- 행 앞의 포맷 배지 색(`DocumentTypeBadge`)은 브랜드 청록과 겹치지 않게 골랐다.
+
 ### 웹 뷰어 (HWP, HWPX, DOCX, TXT)
 
 네이티브 쪽은 전부 `:viewer:web`이 맡는다. 포맷 모듈은 `WebViewerConfig`(HTML 진입점의 asset 경로, 최소 WebView 메이저 버전, 페이지가 검색을 직접 처리하는지)와 자기 assets만 제공한다. 호스트는 포맷을 몰라야 한다.
@@ -130,7 +137,7 @@ python samples/make-office-samples.py samples                                # D
 
 ### 읽기 설정 (종이색, 밝기)
 
-뷰어 안에서만 적용된다. 앱 UI는 라이트 고정이고 색 반전(다크) 모드는 없다.
+뷰어 안에서만 적용된다. 앱 UI는 라이트 고정이고 색 반전(다크) 모드는 없다. 앱 색은 앱 아이콘 배경색 `#00695C` 하나로 고정이고 다이내믹 컬러는 쓰지 않는다 (`core/ui/.../theme/Color.kt`, `androidx.pdf` 뷰용으로 `themes.xml`의 `colorPrimary`도 같은 색).
 
 - 상태는 `:app`의 `ReadingSettingsViewModel`(액티비티 범위) 하나가 갖고, `ViewerDestination`이 뷰어 화면에 `paperColor`와 `onReadingSettings`만 넘긴다. 뷰어 모듈은 `:core:data`에 의존하지 않는다.
 - 세피아는 포맷과 무관하게 문서 영역 위에 곱하기 블렌드로 색을 덮는 `Modifier.sepiaPaper`(`:core:ui`) 하나로 처리한다. 뷰어 페이지의 CSS/JS는 건드리지 않는다.

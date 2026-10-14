@@ -7,7 +7,7 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 
 ### 1차 출시에 포함
 - 지원 포맷: PDF, DOCX, HWP, HWPX, TXT
-- 홈 화면: 전체/포맷별 탭, 최근 본 문서, 즐겨찾기, 파일명 검색, 정렬(이름/날짜/크기)
+- 홈 화면: 포맷 필터 칩, 최근 본 문서/즐겨찾기 칩, 파일명 검색, 정렬(이름/날짜/크기)
 - 뷰어 공통: 확대/축소, 페이지 이동(이전/다음, 쪽 번호를 수정해 바로 이동), 문서 내 텍스트 검색, 공유, 읽기 설정(종이색 흰색/세피아, 화면 밝기)
 - 다른 앱에서 "연결 프로그램"으로 열기 (ACTION_VIEW 인텐트 필터)
 - 오픈소스 라이선스 화면
@@ -55,7 +55,7 @@ Android용 보기 전용 문서 뷰어. Google Play 출시가 목표다.
 :core:data           Room, DataStore, 리포지토리
 :core:files          저장소 접근 권한, 파일 스캔, MIME/확장자 판별
 :core:ui             공용 Composable, 디자인 토큰
-:feature:home        파일 목록, 탭, 검색, 정렬
+:feature:home        파일 목록, 필터 칩, 검색, 정렬
 :feature:settings    설정, 오픈소스 라이선스
 :viewer:pdf          androidx.pdf 래핑 화면
 :viewer:web          공용 WebView 호스트, JS 브리지

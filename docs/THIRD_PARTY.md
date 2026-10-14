@@ -38,7 +38,7 @@
 
 ## 참고
 - `@rhwp/core`의 WASM에 정적으로 포함된 Rust 크레이트(wasm-bindgen, quick-xml, cfb, flate2, encoding_rs, usvg, svg2pdf, pdf-writer, image 등)는 패키지 README 기준 MIT / Apache-2.0 / BSD-3-Clause다. 전체 목록: https://github.com/edwardkim/rhwp/blob/main/THIRD_PARTY_LICENSES.md — 오픈소스 라이선스 화면(M7)을 만들 때 이 목록을 반영해야 한다.
-- 아이콘(`core/ui/src/main/res/drawable/ic_*.xml`)은 Google Material Icons(Apache-2.0)의 경로 데이터를 사용했다.
+- 아이콘(`core/ui/src/main/res/drawable/ic_*.xml`, `feature/home/src/main/res/drawable/ic_home_document.xml`)은 Google Material Icons(Apache-2.0)의 경로 데이터를 사용했다.
 - JUnit의 EPL-1.0은 테스트 전용이며 앱에 포함되지 않는다.
 - 나눔명조의 SIL OFL 1.1은 Guide의 허용 목록(Apache 2.0, MIT, BSD)에 없지만, Guide 4장이 폰트에 대해 따로 정한 "재배포가 허용된 한글 폰트(예: Noto Sans KR, 나눔 계열)"에 해당한다. 대체 매핑은 `docs/font-mapping.md`.
 - androidx.test (ext-junit, espresso-core, Apache-2.0)는 `:viewer:web`의 기기 테스트에만 쓴다.
