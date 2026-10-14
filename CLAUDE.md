@@ -13,7 +13,7 @@ DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX, TXT를 보기만 하는
 Gradle은 JDK 21이 필요하다. 이 PC는 PATH의 `java`가 1.8이므로 먼저 설정한다.
 
 ```bash
-export JAVA_HOME="C:/Program Files/Android/Android Studio2/jbr"
+export JAVA_HOME="C:/Program Files/Android/Android Studio1/jbr"
 ```
 
 작업을 마쳤다고 보고하기 전에 세 가지를 모두 실행한다 (Guide.md §7).
@@ -164,9 +164,9 @@ python samples/make-office-samples.py samples                                # D
 ## 에뮬레이터 메모
 
 - `adb`와 `emulator`는 PATH에 없다. `$LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe`, `$LOCALAPPDATA/Android/Sdk/emulator/emulator.exe`를 쓴다.
-- AVD는 `Pixel_3_API_30`, `Nexus_5X_API_30`, `Pixel_2_API_33`이 있다 (2026-10-12 기준). API 26–29 이미지가 없어서 그 구간의 동작(런타임 저장소 권한, 대체 PDF 뷰어)은 에뮬레이터로 확인할 수 없다.
-- `Pixel_3_API_30`은 WebView가 83이라 DOCX는 열리지만 HWP/HWPX는 업데이트 안내 화면이 나온다.
-- `Pixel_2_API_33`은 부팅 중 adb가 `offline`에서 멈춘 적이 있다. `Pixel_3_API_30`은 `-no-snapshot -gpu swiftshader_indirect`로 정상 부팅됐다.
+- AVD는 `S26`(API 36, WebView 133), `DocReader_API_26`(API 26, WebView 69), `Pixel_3a_API_30`이 있다 (2026-10-14 `emulator -list-avds` 기준). `DocReader_API_26`은 WebView가 69라 웹 뷰어 포맷은 전부 업데이트 안내 화면이 나온다.
+- 2026-10-13부터 어떤 에뮬레이터도 부팅되지 않는다. emulator 37.2.12가 "HAXM is no longer supported"로 종료하고(`-accel off`도 같음), WHPX나 AEHD 드라이버가 설정돼 있지 않다. 기기 확인은 가속 설정을 고치거나 실제 폰을 쓰도록 사용자에게 요청해야 한다.
+- `-no-window`로 띄우면 API 26에서 `screencap`이 빈 이미지를 준다.
 - 에뮬레이터가 느리다. "System UI isn't responding" 대화상자와 프레임 지연 통계는 에뮬레이터 탓이다.
 - 화면 확인은 `uiautomator dump`로 텍스트를 읽는 방법이 가장 안정적이다.
 - 모든 파일 액세스를 테스트로 회수할 때 `appops set <패키지> MANAGE_EXTERNAL_STORAGE deny`는 효과가 없다 (설정 화면에서 허용하면 uid 모드로 기록돼 그쪽이 우선한다). 설정 화면에서 토글을 끈다.
