@@ -8,7 +8,8 @@
     <string name="home_filter_recent">Recent</string>
     <string name="home_filter_favorites">Favorites</string>
     <string name="home_access_required_title">File access is needed</string>
-    <string name="home_access_required_message">Allow file access to list the PDF, DOCX, HWP and HWPX files stored on this device. Documents never leave the device.</string>
+    <string name="home_access_required_message">Allow file access to list the PDF, DOCX, HWP, HWPX and TXT files stored on this device.</string>
+    <string name="home_access_privacy">Documents never leave the device.</string>
     <string name="home_grant_access">Allow access</string>
     <string name="home_empty_documents">No supported documents on this device.</string>
     <string name="home_empty_search">No results.</string>

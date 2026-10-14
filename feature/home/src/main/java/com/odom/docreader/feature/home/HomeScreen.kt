@@ -76,12 +76,7 @@ internal fun HomeContent(
                 enabled = uiState.storageStatus == StorageStatus.READY,
             )
             when (uiState.storageStatus) {
-                StorageStatus.ACCESS_REQUIRED -> EmptyState(
-                    title = stringResource(R.string.home_access_required_title),
-                    message = stringResource(R.string.home_access_required_message),
-                    actionLabel = stringResource(R.string.home_grant_access),
-                    onAction = onGrantAccess,
-                )
+                StorageStatus.ACCESS_REQUIRED -> StorageAccessRequired(onGrantAccess = onGrantAccess)
 
                 StorageStatus.LOADING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()

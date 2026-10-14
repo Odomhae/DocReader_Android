@@ -143,7 +143,7 @@ fun WebDocumentViewerScreen(
                     modifier = Modifier.fillMaxSize(),
                 )
                 if (uiState.status == WebViewerStatus.LOADING) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    LoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
         }
@@ -242,6 +242,23 @@ private fun SearchTopBar(
             }
         },
     )
+}
+
+// Opening an HWP file takes a few seconds while the engine loads; the text says the wait is expected.
+@Composable
+private fun LoadingIndicator(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CircularProgressIndicator()
+        Text(
+            text = stringResource(R.string.web_loading),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
 
 @Composable
