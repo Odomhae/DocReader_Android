@@ -33,7 +33,17 @@ class RoomLibraryRepositoryTest {
         clock.now = 200
         repository.markOpened(document("b.hwp", DocumentType.HWP))
 
-        assertEquals(listOf("b.hwp", "a.pdf"), repository.recentDocuments.first().map { it.name })
+        assertEquals(listOf("b.hwp", "a.pdf"), repository.recentDocuments.first().map { it.file.name })
+    }
+
+    @Test
+    fun recentDocumentsCarryTheTimeTheyWereOpened() = runTest {
+        clock.now = 100
+        repository.markOpened(document("a.pdf"))
+        clock.now = 200
+        repository.markOpened(document("a.pdf"))
+
+        assertEquals(listOf(200L), repository.recentDocuments.first().map { it.openedAt })
     }
 
     @Test
@@ -45,7 +55,7 @@ class RoomLibraryRepositoryTest {
         clock.now = 300
         repository.markOpened(document("a.pdf"))
 
-        assertEquals(listOf("a.pdf", "b.pdf"), repository.recentDocuments.first().map { it.name })
+        assertEquals(listOf("a.pdf", "b.pdf"), repository.recentDocuments.first().map { it.file.name })
     }
 
     @Test
@@ -63,7 +73,7 @@ class RoomLibraryRepositoryTest {
         repository.setFavorite(document("a.pdf"), favorite = true)
         repository.setFavorite(document("a.pdf"), favorite = false)
 
-        assertEquals(listOf("a.pdf"), repository.recentDocuments.first().map { it.name })
+        assertEquals(listOf("a.pdf"), repository.recentDocuments.first().map { it.file.name })
         assertTrue(repository.favoriteDocuments.first().isEmpty())
     }
 
@@ -81,7 +91,7 @@ class RoomLibraryRepositoryTest {
         clock.now = 100
         repository.markOpened(document("a.pdf"))
 
-        assertEquals(listOf("a.pdf"), repository.recentDocuments.first().map { it.name })
+        assertEquals(listOf("a.pdf"), repository.recentDocuments.first().map { it.file.name })
         assertTrue(repository.favoriteDocuments.first().isEmpty())
     }
 

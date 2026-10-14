@@ -1,6 +1,7 @@
 package com.odom.docreader.feature.home
 
 import com.odom.docreader.core.data.LibraryRepository
+import com.odom.docreader.core.data.RecentDocument
 import com.odom.docreader.core.data.SettingsRepository
 import com.odom.docreader.core.files.DocumentScanner
 import com.odom.docreader.core.files.ScanResult
@@ -195,11 +196,14 @@ class HomeViewModelTest {
     }
 
     private class FakeLibraryRepository : LibraryRepository {
-        override val recentDocuments = MutableStateFlow<List<DocumentFile>>(emptyList())
+        override val recentDocuments = MutableStateFlow<List<RecentDocument>>(emptyList())
         override val favoriteDocuments = MutableStateFlow<List<DocumentFile>>(emptyList())
+        private var now = 0L
 
         override suspend fun markOpened(document: DocumentFile) {
-            recentDocuments.value = listOf(document) + (recentDocuments.value - document)
+            now += 1
+            recentDocuments.value =
+                listOf(RecentDocument(document, openedAt = now)) + recentDocuments.value.filter { it.file != document }
         }
 
         override suspend fun setFavorite(document: DocumentFile, favorite: Boolean) {

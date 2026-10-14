@@ -21,6 +21,7 @@
     <string name="home_type_hwp" translatable="false">HWP</string>
     <string name="home_type_hwpx" translatable="false">HWPX</string>
     <string name="home_type_txt" translatable="false">TXT</string>
-    <string name="home_document_details" translatable="false">%1$s · %2$s · %3$s</string>
+    <string name="home_document_details" translatable="false">%1$s · %2$s</string>
+    <string name="home_opened_just_now">방금 전</string>
     <string name="home_settings">설정</string>
 </resources>

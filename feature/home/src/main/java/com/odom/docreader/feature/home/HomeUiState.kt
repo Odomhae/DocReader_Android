@@ -29,6 +29,8 @@ enum class StorageStatus {
 data class DocumentListItem(
     val file: DocumentFile,
     val isFavorite: Boolean,
+    /** When the document was last opened, set only while the recent list is shown. Epoch milliseconds. */
+    val openedAt: Long? = null,
 )
 
 data class HomeUiState(

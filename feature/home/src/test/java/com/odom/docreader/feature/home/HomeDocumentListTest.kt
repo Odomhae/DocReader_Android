@@ -1,5 +1,6 @@
 package com.odom.docreader.feature.home
 
+import com.odom.docreader.core.data.RecentDocument
 import com.odom.docreader.core.model.DocumentFile
 import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.core.model.SortOrder
@@ -21,7 +22,22 @@ class HomeDocumentListTest {
         sortOrder: SortOrder = SortOrder.NAME,
         recent: List<DocumentFile> = emptyList(),
         favorites: List<DocumentFile> = emptyList(),
-    ) = buildDocumentList(format, collection, query, sortOrder, folder, recent, favorites).map { it.file.name }
+    ) = buildDocumentList(format, collection, query, sortOrder, folder, recent.asRecent(), favorites).map { it.file.name }
+
+    // Newest first, as the repository returns them.
+    private fun List<DocumentFile>.asRecent() =
+        mapIndexed { index, document -> RecentDocument(document, openedAt = 1_000L - index) }
+
+    @Test
+    fun onlyTheRecentListCarriesTheOpenedTime() {
+        val recent = listOf(charlie, alpha).asRecent()
+
+        val underRecent = buildDocumentList(null, CollectionFilter.RECENT, "", SortOrder.NAME, folder, recent, emptyList())
+        val everything = buildDocumentList(null, null, "", SortOrder.NAME, folder, recent, emptyList())
+
+        assertEquals(listOf(1_000L, 999L), underRecent.map { it.openedAt })
+        assertTrue(everything.all { it.openedAt == null })
+    }
 
     @Test
     fun noFilterListsEveryDocument() {

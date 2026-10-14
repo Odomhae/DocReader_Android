@@ -1,5 +1,6 @@
 package com.odom.docreader.feature.home
 
+import android.text.format.DateUtils
 import android.text.format.Formatter
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.odom.docreader.core.model.DocumentFile
-import com.odom.docreader.core.model.DocumentType
 import com.odom.docreader.core.ui.R as UiR
 import java.text.DateFormat
 import java.util.Date
@@ -46,18 +46,14 @@ internal fun DocumentList(
 private fun DocumentRow(item: DocumentListItem, onToggleFavorite: () -> Unit, onClick: () -> Unit) {
     val context = LocalContext.current
     val dateFormat = remember { DateFormat.getDateInstance(DateFormat.MEDIUM) }
+    val openedAt = item.openedAt
+    val time = if (openedAt != null) openedTimeText(openedAt) else dateFormat.format(Date(item.file.lastModified))
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
+        leadingContent = { DocumentTypeBadge(item.file.type) },
         headlineContent = { Text(item.file.name, maxLines = 2, overflow = TextOverflow.Ellipsis) },
         supportingContent = {
-            Text(
-                stringResource(
-                    R.string.home_document_details,
-                    stringResource(item.file.type.labelRes),
-                    Formatter.formatShortFileSize(context, item.file.sizeBytes),
-                    dateFormat.format(Date(item.file.lastModified)),
-                ),
-            )
+            Text(stringResource(R.string.home_document_details, Formatter.formatShortFileSize(context, item.file.sizeBytes), time))
         },
         trailingContent = {
             IconButton(onClick = onToggleFavorite) {
@@ -78,11 +74,11 @@ private fun DocumentRow(item: DocumentListItem, onToggleFavorite: () -> Unit, on
     )
 }
 
-private val DocumentType.labelRes: Int
-    get() = when (this) {
-        DocumentType.PDF -> R.string.home_type_pdf
-        DocumentType.DOCX -> R.string.home_type_docx
-        DocumentType.HWP -> R.string.home_type_hwp
-        DocumentType.HWPX -> R.string.home_type_hwpx
-        DocumentType.TXT -> R.string.home_type_txt
-    }
+/** "3 hours ago" style; DateUtils falls back to a date once it is more than a week old. */
+@Composable
+private fun openedTimeText(openedAt: Long): String {
+    val now = System.currentTimeMillis()
+    // Under a minute DateUtils would say "0 minutes ago".
+    if (now - openedAt < DateUtils.MINUTE_IN_MILLIS) return stringResource(R.string.home_opened_just_now)
+    return DateUtils.getRelativeTimeSpanString(openedAt, now, DateUtils.MINUTE_IN_MILLIS).toString()
+}

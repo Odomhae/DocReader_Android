@@ -1,6 +1,7 @@
 package com.odom.docreader
 
 import com.odom.docreader.core.data.LibraryRepository
+import com.odom.docreader.core.data.RecentDocument
 import com.odom.docreader.core.files.ExternalDocument
 import com.odom.docreader.core.files.ExternalDocumentResolver
 import com.odom.docreader.core.model.DocumentFile
@@ -114,7 +115,7 @@ class MainViewModelTest {
 
     private class FakeLibraryRepository : LibraryRepository {
         val opened = mutableListOf<DocumentFile>()
-        override val recentDocuments: Flow<List<DocumentFile>> = flowOf(emptyList())
+        override val recentDocuments: Flow<List<RecentDocument>> = flowOf(emptyList())
         override val favoriteDocuments: Flow<List<DocumentFile>> = flowOf(emptyList())
 
         override suspend fun markOpened(document: DocumentFile) {

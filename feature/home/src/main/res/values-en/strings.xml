@@ -16,5 +16,6 @@
     <string name="home_empty_favorites">No favorite documents.</string>
     <string name="home_add_favorite">Add to favorites</string>
     <string name="home_remove_favorite">Remove from favorites</string>
+    <string name="home_opened_just_now">Just now</string>
     <string name="home_settings">Settings</string>
 </resources>

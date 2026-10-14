@@ -9,9 +9,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/** [openedAt] is epoch milliseconds. */
+data class RecentDocument(val file: DocumentFile, val openedAt: Long)
+
 interface LibraryRepository {
     /** Most recently opened first. */
-    val recentDocuments: Flow<List<DocumentFile>>
+    val recentDocuments: Flow<List<RecentDocument>>
 
     val favoriteDocuments: Flow<List<DocumentFile>>
 
@@ -25,8 +28,13 @@ class RoomLibraryRepository @Inject constructor(
     private val clock: Clock,
 ) : LibraryRepository {
 
-    override val recentDocuments: Flow<List<DocumentFile>> =
-        documentDao.observeRecent(RECENT_LIMIT).map { entities -> entities.mapNotNull { it.toDocumentFile() } }
+    override val recentDocuments: Flow<List<RecentDocument>> =
+        documentDao.observeRecent(RECENT_LIMIT).map { entities ->
+            entities.mapNotNull { entity ->
+                val openedAt = entity.lastOpenedAt ?: return@mapNotNull null
+                entity.toDocumentFile()?.let { RecentDocument(it, openedAt) }
+            }
+        }
 
     override val favoriteDocuments: Flow<List<DocumentFile>> =
         documentDao.observeFavorites().map { entities -> entities.mapNotNull { it.toDocumentFile() } }
