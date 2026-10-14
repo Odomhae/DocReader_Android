@@ -17,7 +17,7 @@
 | androidx.lifecycle (runtime, viewmodel-compose) | 2.11.0 | Apache-2.0 | Google Maven | |
 | androidx.navigation:navigation-compose | 2.10.2 | Apache-2.0 | Google Maven | 타입 세이프 내비게이션 |
 | androidx.fragment (fragment-ktx, fragment-compose) | 1.9.1 | Apache-2.0 | Google Maven | PdfViewerFragment 호스팅 |
-| androidx.room (runtime, ktx) | 2.8.5 | Apache-2.0 | Google Maven | 최근 문서, 즐겨찾기 |
+| androidx.room (runtime, ktx) | 2.8.5 | Apache-2.0 | Google Maven | 최근 문서 |
 | androidx.datastore:datastore-preferences | 1.2.1 | Apache-2.0 | Google Maven | 설정 저장 |
 | androidx.hilt:hilt-lifecycle-viewmodel-compose | 1.4.0 | Apache-2.0 | Google Maven | |
 | androidx.webkit:webkit | 1.17.1 | Apache-2.0 | Google Maven | `WebViewAssetLoader`, WebView 버전 확인 |

@@ -60,11 +60,11 @@ python samples/make-office-samples.py samples                                # D
 ```
 :app                 진입점, 내비게이션 그래프, ACTION_VIEW 인텐트 처리
 :core:model          DocumentFile, DocumentType, SortOrder (순수 JVM)
-:core:data           Room(최근/즐겨찾기), DataStore(설정), 리포지토리
+:core:data           Room(최근 문서), DataStore(설정), 리포지토리
 :core:files          저장소 접근 권한, 파일 스캔, 포맷 판별, 공유 / 다른 앱으로 열기
 :core:ui             테마, 공용 Composable과 아이콘
 :feature:home        파일 목록, 필터 칩, 검색, 정렬
-:feature:settings    설정, 오픈소스 라이선스 화면
+:feature:settings    설정(글씨 크기), 오픈소스 라이선스 화면
 :viewer:pdf          PDF 뷰어
 :viewer:web          포맷을 모르는 WebView 호스트 + JS 브리지
 :viewer:hwp          rhwp 번들 + HWP/HWPX 뷰어 페이지
@@ -91,7 +91,7 @@ python samples/make-office-samples.py samples                                # D
 
 홈 목록은 기기 공용 저장소에 있는 지원 문서 전부다. 폴더 선택은 없다 (2026-10-12에 SAF 폴더 선택 방식에서 변경).
 
-- `MediaStoreDocumentScanner`가 디렉터리를 훑지 않고 `MediaStore.Files`를 확장자로 한 번 조회한다. 그래서 Uri가 `content://media/external/file/<id>` 형태이고, 뷰어·최근 문서·즐겨찾기·공유가 스캔 방식과 무관하게 동작한다.
+- `MediaStoreDocumentScanner`가 디렉터리를 훑지 않고 `MediaStore.Files`를 확장자로 한 번 조회한다. 그래서 Uri가 `content://media/external/file/<id>` 형태이고, 뷰어·최근 문서·공유가 스캔 방식과 무관하게 동작한다.
 - 권한은 `StorageAccess`가 API 수준 차이를 감춘다. API 30 이상은 `MANAGE_EXTERNAL_STORAGE`(시스템 설정의 "모든 파일에 대한 액세스" 토글), API 26–29는 `READ_EXTERNAL_STORAGE` 런타임 권한이다. API 29는 매니페스트의 `requestLegacyExternalStorage`에 의존한다.
 - 권한 요청 UI는 `feature/home/.../StorageAccessRequest.kt`에 있다. API 30 이상의 설정 화면은 토글을 켜도 스스로 닫히지 않아서, 권한이 생길 때까지 지켜보다가 `finishActivity`로 닫아 앱으로 돌아온다 (그러려고 설정 화면을 `startActivityForResult`로 연다). 결과를 콜백으로 받지 않는다. 홈 화면이 resume될 때마다 다시 스캔하므로(`LifecycleResumeEffect`) 설정 화면이나 권한 팝업에서 돌아오면 저절로 반영된다.
 - 권한이 없으면 스캐너가 `ScanResult.AccessRequired`를 돌려주고 홈은 `StorageStatus.ACCESS_REQUIRED` 화면을 보여준다.
@@ -101,7 +101,8 @@ python samples/make-office-samples.py samples                                # D
 ### 홈 화면 구성 (2026-10-14)
 
 - 제목 줄이 없다. 맨 위 줄은 검색창과 정렬·설정 버튼이고, 권한이 없을 때도 설정에 갈 수 있도록 모든 상태에서 보인다.
-- 그 아래 칩 두 줄: 포맷(PDF/DOCX/HWP/TXT, HWP 칩은 HWPX 포함)과 최근/즐겨찾기. 각 줄은 하나만 선택되고, 다시 누르면 해제된다. 두 줄은 조합되며 아무것도 고르지 않으면 기기 전체 목록이다. "전체" 칩은 일부러 없다.
+- 그 아래 칩 한 줄: 최근, PDF, DOCX, HWP(HWPX 포함), TXT (`HomeFilter`). 하나만 선택되고, 다시 누르면 해제되어 기기 전체 목록이 된다. "전체" 칩은 일부러 없고, 최근과 포맷은 조합하지 않는다.
+- 즐겨찾기는 2026-10-14에 없앴다. DB 버전은 개발 중이라 1로 둔 채 `isFavorite` 컬럼을 지웠으므로, 이전 빌드가 설치된 기기는 앱을 다시 설치해야 한다 (스키마 해시가 달라 Room이 열기를 거부한다). `documents` 테이블에는 연 문서만 있고 `lastOpenedAt`은 non-null이다.
 - 최근을 켜면 정렬 설정을 무시하고 연 순서로 보이며, 행에 수정일 대신 연 시각을 보여준다 (`LibraryRepository.recentDocuments`가 `RecentDocument`로 연 시각을 함께 준다).
 - 행 앞의 포맷 배지 색(`DocumentTypeBadge`)은 브랜드 청록과 겹치지 않게 골랐다.
 
@@ -134,6 +135,10 @@ python samples/make-office-samples.py samples                                # D
 - `androidx.pdf`는 프래그먼트의 `onPdfViewCreated`로 받은 `PdfView`에서 현재 쪽을 듣고 `scrollToPage`를 호출한다. 현재 쪽은 첫 보이는 쪽이 아니라 화면 가운데에 있는 쪽이다 (`scrollToPage`가 대상 쪽을 가운데에 맞추기 때문에 첫 보이는 쪽으로 세면 이전/다음이 멈춘다). 이 콜백은 1.0.0-beta01에서 `@ExperimentalPdfApi`라서 라이브러리를 올릴 때 시그니처가 바뀌었는지 확인한다.
 - 구형 PDF 뷰어는 `LazyListState`의 첫 보이는 항목을 현재 쪽으로 쓴다.
 - 막대는 번호를 수정하는 동안에만 키보드 위로 올라온다. 그래서 액티비티가 `adjustResize`다.
+
+### 글씨 크기
+
+설정 화면에서 고르는 4단계 배율(`FontScale`, `SettingsRepository`에 저장)이 앱의 Compose UI 글씨에만 적용된다. `MainActivity`가 `AppearanceViewModel`에서 읽어 `DocReaderTheme(fontScaleMultiplier)`에 넘기고, 테마가 `LocalDensity.fontScale`에 시스템 값과 곱한다. 문서 본문(WebView, PDF 페이지)과 `androidx.pdf`의 View 기반 UI는 바뀌지 않는다.
 
 ### 읽기 설정 (종이색, 밝기)
 
