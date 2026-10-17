@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DocReader</string>
+    <string name="app_name">척척문서</string>
     <string name="navigate_back">뒤로</string>
     <string name="unsupported_title">열 수 없는 파일입니다</string>
     <string name="unsupported_message">지원하지 않는 형식이거나 파일을 읽을 수 없습니다. PDF, DOCX, HWP, HWPX 파일만 열 수 있습니다.</string>

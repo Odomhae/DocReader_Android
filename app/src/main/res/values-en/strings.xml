@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DocReader</string>
+    <string name="app_name">Readily</string>
     <string name="navigate_back">Back</string>
     <string name="unsupported_title">Can\'t open this file</string>
     <string name="unsupported_message">The format is not supported or the file can\'t be read. Only PDF, DOCX, HWP and HWPX files can be opened.</string>
