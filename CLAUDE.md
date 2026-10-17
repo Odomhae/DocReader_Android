@@ -13,7 +13,7 @@ DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX, TXT를 보기만 하는
 Gradle은 JDK 21이 필요하다. 이 PC는 PATH의 `java`가 1.8이므로 먼저 설정한다.
 
 ```bash
-export JAVA_HOME="C:/Program Files/Android/Android Studio1/jbr"
+export JAVA_HOME="C:/Program Files/Android/Android Studio2/jbr"
 ```
 
 작업을 마쳤다고 보고하기 전에 세 가지를 모두 실행한다 (Guide.md §7).
@@ -32,7 +32,7 @@ export JAVA_HOME="C:/Program Files/Android/Android Studio1/jbr"
 ./gradlew :viewer:web:testDebugUnitTest --tests "*.WebViewerViewModelTest.someMethod"
 ```
 
-`:core:model`은 순수 Kotlin/JVM 모듈이라 태스크가 `testDebugUnitTest`가 아니라 `:core:model:test`다 (테스트는 아직 없다). `:viewer:hwp`, `:viewer:docx`, `:viewer:txt`, `:core:ui`도 테스트가 없다. 세 뷰어 모듈의 로직은 JS assets에 있어서 에뮬레이터에서만 확인할 수 있다. `MediaStoreDocumentScanner`도 실제 `MediaStore`가 필요해 단위 테스트가 없다.
+`:core:model`은 순수 Kotlin/JVM 모듈이라 태스크가 `testDebugUnitTest`가 아니라 `:core:model:test`다 (`PageInputTest`). `:viewer:hwp`, `:viewer:docx`, `:viewer:txt`, `:core:ui`도 테스트가 없다. 세 뷰어 모듈의 로직은 JS assets에 있어서 에뮬레이터에서만 확인할 수 있다. `MediaStoreDocumentScanner`도 실제 `MediaStore`가 필요해 단위 테스트가 없다.
 
 계측 테스트는 `:viewer:web`에만 의미 있는 것이 있다 (네트워크 차단, 대용량 파일 스트리밍).
 
