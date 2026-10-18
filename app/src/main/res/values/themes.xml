@@ -6,4 +6,12 @@
         <!-- Those views take their accent from here, not from the Compose theme. -->
         <item name="colorPrimary">@color/brand_teal</item>
     </style>
+
+    <!-- Kept on screen while a cold start waits for an app open ad. -->
+    <style name="Theme.DocReader.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/brand_teal</item>
+        <item name="postSplashScreenTheme">@style/Theme.DocReader</item>
+    </style>
 </resources>

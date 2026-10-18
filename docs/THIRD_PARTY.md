@@ -20,6 +20,8 @@
 | androidx.room (runtime, ktx) | 2.8.5 | Apache-2.0 | Google Maven | 최근 문서 |
 | androidx.datastore:datastore-preferences | 1.2.1 | Apache-2.0 | Google Maven | 설정 저장 |
 | androidx.hilt:hilt-lifecycle-viewmodel-compose | 1.4.0 | Apache-2.0 | Google Maven | |
+| androidx.core:core-splashscreen | 1.2.0 | Apache-2.0 | Google Maven | 콜드 스타트에서 오프닝 광고를 기다리는 동안 스플래시 유지 |
+| androidx.lifecycle:lifecycle-process | 2.11.0 | Apache-2.0 | Google Maven | 백그라운드 복귀 감지 (오프닝 광고) |
 | androidx.webkit:webkit | 1.17.1 | Apache-2.0 | Google Maven | `WebViewAssetLoader`, WebView 버전 확인 |
 | com.google.android.material:material | 1.13.0 | Apache-2.0 | Google Maven | androidx.pdf 뷰가 요구하는 Material3 테마 |
 | com.google.dagger:hilt-android | 2.60.1 | Apache-2.0 | Maven Central | DI |
