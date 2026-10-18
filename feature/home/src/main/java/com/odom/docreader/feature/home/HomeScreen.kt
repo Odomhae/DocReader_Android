@@ -1,5 +1,7 @@
 package com.odom.docreader.feature.home
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,12 +10,17 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.odom.docreader.core.ads.BannerAd
+import com.odom.docreader.core.ads.ExitDialog
 import com.odom.docreader.core.model.DocumentFile
 import com.odom.docreader.core.model.SortOrder
 import com.odom.docreader.core.ui.EmptyState
@@ -34,6 +41,14 @@ fun HomeScreen(
         onPauseOrDispose {}
     }
 
+    val activity = LocalActivity.current
+    var showExitDialog by remember { mutableStateOf(false) }
+    // Home is the start destination, so back here would leave the app.
+    BackHandler { showExitDialog = true }
+    if (showExitDialog) {
+        ExitDialog(onDismiss = { showExitDialog = false }, onExit = { activity?.finish() })
+    }
+
     HomeContent(
         uiState = uiState,
         onGrantAccess = requestStorageAccess,
@@ -46,6 +61,7 @@ fun HomeScreen(
             onOpenDocument(document)
         },
         modifier = modifier,
+        bottomBar = { BannerAd() },
     )
 }
 
@@ -59,8 +75,9 @@ internal fun HomeContent(
     onFilterToggled: (HomeFilter) -> Unit,
     onOpenDocument: (DocumentFile) -> Unit,
     modifier: Modifier = Modifier,
+    bottomBar: @Composable () -> Unit = {},
 ) {
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(modifier = modifier.fillMaxSize(), bottomBar = bottomBar) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             // Shown in every state so that settings stays reachable before access is granted.
             HomeSearchBar(

@@ -24,6 +24,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ads"))
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:files"))

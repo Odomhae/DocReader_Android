@@ -25,6 +25,19 @@
 | com.google.dagger:hilt-android | 2.60.1 | Apache-2.0 | Maven Central | DI |
 | org.jetbrains.kotlinx:kotlinx-coroutines-android | 1.11.0 | Apache-2.0 | Maven Central | |
 | org.jetbrains.kotlinx:kotlinx-serialization-core | 1.9.0 | Apache-2.0 | Maven Central | 내비게이션 라우트 직렬화 |
+| com.google.guava:failureaccess | 1.0.1 (ads-mobile-sdk의 의존성) | Apache-2.0 | Maven Central | |
+
+## 앱에 포함, 오픈소스가 아님 (라이선스 규칙의 예외)
+
+의존성은 Apache-2.0, MIT, BSD만 허용한다는 규칙의 유일한 예외다 (2026-10-18 결정, `docs/superpowers/specs/2026-10-18-admob-design.md`). 광고에만 쓰고 `:core:ads` 밖에서는 직접 쓰지 않는다. 오픈소스가 아니므로 앱 안의 오픈소스 라이선스 화면에는 넣지 않는다.
+
+| 이름 | 버전 | 약관 | 출처 | 용도 |
+|---|---|---|---|---|
+| com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk (GMA Next-Gen SDK) | 1.5.0 | Google 독점 SDK (AdMob 이용약관 적용) | Google Maven | AdMob 광고 |
+| com.google.android.ump:user-messaging-platform | 4.0.0 | Google 독점 SDK (AdMob 이용약관 적용) | Google Maven | EEA·영국 광고 동의 (UMP) |
+| com.google.android.gms:play-services-ads-identifier | 18.0.0 (ads-mobile-sdk의 의존성) | Android SDK 라이선스 | Google Maven | 광고 ID |
+
+ads-mobile-sdk가 함께 가져오는 오픈소스 의존성(AndroidX, Kotlin, kotlinx, Guava listenablefuture·failureaccess)은 모두 Apache-2.0이고 위 표와 앱 안의 목록에 포함돼 있다.
 
 ## 빌드·테스트에만 사용 (앱에 포함되지 않음)
 

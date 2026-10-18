@@ -3,6 +3,8 @@
     <string name="settings_back">Back</string>
     <string name="settings_licenses">Open-source licenses</string>
     <string name="settings_licenses_summary">Open-source software and fonts included in this app</string>
+    <string name="settings_privacy_options">Privacy options</string>
+    <string name="settings_privacy_options_summary">Change your ad privacy choices</string>
     <string name="settings_version">Version</string>
     <string name="settings_font_scale">Text size</string>
     <string name="settings_font_scale_small">Small</string>

@@ -3,6 +3,8 @@
     <string name="settings_back">뒤로</string>
     <string name="settings_licenses">오픈소스 라이선스</string>
     <string name="settings_licenses_summary">이 앱에 포함된 오픈소스 소프트웨어와 폰트</string>
+    <string name="settings_privacy_options">개인정보 옵션</string>
+    <string name="settings_privacy_options_summary">광고 개인 정보 동의 설정을 변경합니다</string>
     <string name="settings_version">버전</string>
     <string name="settings_font_scale">글씨 크기</string>
     <string name="settings_font_scale_small">작게</string>
@@ -36,6 +38,6 @@
     <string name="settings_copyright_kotlin" translatable="false">Copyright JetBrains s.r.o. and Kotlin Programming Language contributors</string>
     <string name="settings_library_okio" translatable="false">Okio</string>
     <string name="settings_copyright_okio" translatable="false">Copyright Square, Inc.</string>
-    <string name="settings_library_java_annotations" translatable="false">Guava ListenableFuture, Error Prone annotations, JSR-305, JSpecify, javax.inject, jakarta.inject</string>
+    <string name="settings_library_java_annotations" translatable="false">Guava ListenableFuture, Guava failureaccess, Error Prone annotations, JSR-305, JSpecify, javax.inject, jakarta.inject</string>
     <string name="settings_copyright_java_annotations" translatable="false">Copyright their respective authors</string>
 </resources>

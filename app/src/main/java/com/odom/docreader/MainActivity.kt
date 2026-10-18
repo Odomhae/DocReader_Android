@@ -10,15 +10,20 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.odom.docreader.core.ads.AdsController
 import com.odom.docreader.core.ui.theme.DocReaderTheme
 import com.odom.docreader.navigation.DocReaderNavHost
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 // FragmentActivity because the PDF viewer hosts androidx.pdf's PdfViewerFragment.
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val appearanceViewModel: AppearanceViewModel by viewModels()
+
+    @Inject
+    lateinit var ads: AdsController
 
     // The app is light-only. Without this, a device in dark mode would still pick night
     // resources in androidx.pdf's views and light system bar icons in enableEdgeToEdge().
@@ -31,7 +36,11 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // On re-creation the navigation back stack already holds the document that was opened.
-        if (savedInstanceState == null) handleViewIntent(intent)
+        if (savedInstanceState == null) {
+            handleViewIntent(intent)
+            ads.gatherConsent(this)
+            ads.showAppOpenAdIfEligible(this, launchedFromLauncher = intent.isLauncherLaunch())
+        }
         setContent {
             val fontScale by appearanceViewModel.uiState.collectAsStateWithLifecycle()
             DocReaderTheme(fontScaleMultiplier = fontScale.multiplier) {
@@ -49,6 +58,9 @@ class MainActivity : FragmentActivity() {
         setIntent(intent)
         handleViewIntent(intent)
     }
+
+    private fun Intent.isLauncherLaunch(): Boolean =
+        action == Intent.ACTION_MAIN && hasCategory(Intent.CATEGORY_LAUNCHER)
 
     private fun handleViewIntent(intent: Intent) {
         if (intent.action != Intent.ACTION_VIEW) return

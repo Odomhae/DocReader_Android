@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 이 프로젝트는
 
-DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX, TXT를 보기만 하는 Android 문서 뷰어이고 Google Play 출시가 목표다. 완전히 오프라인으로 동작한다. 문서는 기기 밖으로 나가지 않으며 앱에 `INTERNET` 권한이 없다.
+DocReader(`com.odom.docreader`)는 PDF, DOCX, HWP, HWPX, TXT를 보기만 하는 Android 문서 뷰어이고 Google Play 출시가 목표다. 완전히 오프라인으로 동작한다. 문서는 기기 밖으로 나가지 않는다. `INTERNET` 권한은 AdMob 광고에만 쓰고(`:core:ads`), 오프라인이면 광고만 나오지 않는다.
 
 `Guide.md`가 프로젝트의 기준 문서다. 제품 범위, 제외 항목, 설계 결정, 마일스톤 M0–M7, 코드 규칙이 들어 있으니 사소하지 않은 변경 전에는 먼저 읽는다. 마일스톤은 모두 구현됐고, 남은 일은 출시 준비와 실기기 검증이다 (`docs/release.md`에 아직 확인하지 못한 항목이 정리돼 있다).
 
@@ -63,6 +63,7 @@ python samples/make-office-samples.py samples                                # D
 :core:data           Room(최근 문서), DataStore(설정), 리포지토리
 :core:files          저장소 접근 권한, 파일 스캔, 포맷 판별, 공유 / 다른 앱으로 열기
 :core:ui             테마, 공용 Composable과 아이콘
+:core:ads            AdMob(GMA Next-Gen SDK), UMP 동의, 배너·종료 팝업 Composable
 :feature:home        파일 목록, 필터 칩, 검색, 정렬
 :feature:settings    설정(글씨 크기), 오픈소스 라이선스 화면
 :viewer:pdf          PDF 뷰어
@@ -149,16 +150,27 @@ python samples/make-office-samples.py samples                                # D
 - 밝기는 `ViewerDestination`이 창의 `screenBrightness`를 바꾸고 뷰어를 나가면 되돌린다. "시스템 밝기 사용"이 켜져 있으면 값을 건드리지 않는다.
 - 저장은 `ReadingSettingsRepository`(DataStore). 슬라이더는 드래그가 끝날 때 한 번만 저장한다.
 
+### 광고 (2026-10-18)
+
+설계는 `docs/superpowers/specs/2026-10-18-admob-design.md`. 기존 SDK(`play-services-ads`)가 아니라 GMA Next-Gen SDK(`ads-mobile-sdk`)를 쓴다. 콜백이 백그라운드 스레드에서 오고, 패키지가 `com.google.android.libraries.ads.mobile.sdk`다.
+
+- `AdsController`(싱글턴)가 UMP 동의, `MobileAds` 초기화(백그라운드), 미리 로드를 맡는다. `MainActivity`가 새로 만들어질 때 `gatherConsent`와 `showAppOpenAdIfEligible`을 부른다. 다른 모듈의 화면은 `AdsViewModel`을 통해 접근한다.
+- 오프닝 광고와 종료 팝업 광고는 SDK의 `AppOpenAdPreloader` / `BannerAdPreloader`가 미리 불러온다. 재시도와 만료 교체를 SDK가 하므로 직접 재시도하지 않는다.
+- 오프닝 광고는 런처로 새로 실행했고, 첫 실행 세션이 아니고(`LaunchHistoryRepository`), 그 순간 이미 로드돼 있을 때만 띄운다(`shouldShowAppOpenAd`). 기다리지 않으므로 콜드 스타트에서는 거의 뜨지 않는다. 의도된 동작이다.
+- 홈과 설정 아래 `BannerAd`는 로드되기 전에는 높이 0이다. 홈의 뒤로가기는 모두 `ExitDialog`를 연다. 광고가 없으면 같은 팝업이 광고 없이 뜬다.
+- 광고 ID는 `core/ads/src/main/res/values/ad_units.xml`(디버그, Google 테스트 ID)과 `src/release/res/values/ad_units.xml`(릴리스)에 있다. 릴리스 쪽에 테스트 ID가 남아 있으면 `bundleRelease`가 실패한다. `assembleRelease`는 통과한다.
+- 뷰어 모듈은 `:core:ads`에 의존하지 않고 WebView 네트워크 차단도 그대로다.
+
 ## 프로젝트 규칙 (Guide.md에서)
 
 - 1차 출시 범위 밖이므로 만들지 않는다: 모든 편집 기능, 포맷 변환, 구형 DOC/XLS/PPT, 로그인이나 클라우드 동기화. 범위가 애매하면 먼저 묻는다.
-- 의존성은 Apache-2.0, MIT, BSD만 허용한다. **GPL/AGPL 금지** (예: MuPDF, iText). 추가 전에 라이선스를 확인하고 이름, 버전, 라이선스, 출처를 `docs/THIRD_PARTY.md`에 기록한다. 앱 안의 라이선스 목록은 `feature/settings/.../OpenSourceLibraries.kt`, 전문은 `feature/settings/src/main/assets/licenses/`에 있다.
+- 의존성은 Apache-2.0, MIT, BSD만 허용한다. 유일한 예외는 `:core:ads`의 Google 광고 SDK 두 개다. **GPL/AGPL 금지** (예: MuPDF, iText). 추가 전에 라이선스를 확인하고 이름, 버전, 라이선스, 출처를 `docs/THIRD_PARTY.md`에 기록한다. 앱 안의 라이선스 목록은 `feature/settings/.../OpenSourceLibraries.kt`, 전문은 `feature/settings/src/main/assets/licenses/`에 있다.
 - 라이브러리의 현재 버전, API, minSdk를 공식 문서에서 확인한 뒤 코드를 쓴다. 이 프로젝트의 스택은 최신이고 빠르게 바뀐다.
 - 렌더링 엔진이 동작하지 않으면 원인과 대안을 보고하고 멈춘다. 임의로 엔진을 바꾸지 않는다.
 - UI 문자열은 `strings.xml`에 둔다. 기본 언어는 한국어이고 영어 번역을 함께 유지한다.
 - ViewModel은 `StateFlow<UiState>` 하나만 노출하고 Composable은 상태를 그리기만 한다.
 - IO는 주입받은 디스패처(`:core:files`의 `@IoDispatcher`)에서 실행한다. `Dispatchers.IO`를 직접 쓰지 않는다.
-- 예외를 삼키지 않는다. 열기 실패는 사용자에게 보이는 오류 상태가 된다.
+- 예외를 삼키지 않는다. 열기 실패는 사용자에게 보이는 오류 상태가 된다. 광고 실패만 예외로, 사용자에게 알리지 않고 오류 코드만 로그에 남긴다.
 - 주석은 "왜"만 쓴다.
 - 쓰지 않는 코드, 미래를 위한 추상화, 요청받지 않은 리팩터링을 넣지 않는다.
 - 리포지토리, ViewModel, 포맷 판별 로직에는 단위 테스트를 작성한다.

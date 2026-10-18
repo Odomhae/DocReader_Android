@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google's public test IDs. Debug builds must never request real ads: clicking them is a policy
+     violation that can get the AdMob account suspended. -->
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="admob_app_open_unit" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
+    <string name="admob_banner_unit" translatable="false">ca-app-pub-3940256099942544/9214589741</string>
+    <string name="admob_exit_dialog_unit" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+</resources>

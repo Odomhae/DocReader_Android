@@ -62,7 +62,19 @@ android {
     }
 }
 
+// A Play upload with Google's test ad IDs would earn nothing and violates AdMob policy.
+// Assembling a release APK for local testing is still allowed.
+val releaseAdUnits = rootProject.file("core/ads/src/release/res/values/ad_units.xml")
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    doFirst {
+        if ("ca-app-pub-3940256099942544" in releaseAdUnits.readText()) {
+            throw GradleException("Put the real AdMob IDs in ${releaseAdUnits.path} before building the release bundle.")
+        }
+    }
+}
+
 dependencies {
+    implementation(project(":core:ads"))
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:files"))

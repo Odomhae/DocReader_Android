@@ -1,5 +1,6 @@
 package com.odom.docreader.feature.settings
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.odom.docreader.core.ads.AdsViewModel
+import com.odom.docreader.core.ads.BannerAd
 import com.odom.docreader.core.model.FontScale
 import com.odom.docreader.core.ui.R as UiR
 
@@ -41,8 +44,11 @@ fun SettingsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
+    adsViewModel: AdsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val adsState by adsViewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
     var showFontScaleDialog by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val versionName = remember {
@@ -63,6 +69,7 @@ fun SettingsScreen(
                 },
             )
         },
+        bottomBar = { BannerAd() },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             ListItem(
@@ -77,6 +84,15 @@ fun SettingsScreen(
                 supportingContent = { Text(stringResource(R.string.settings_licenses_summary)) },
             )
             HorizontalDivider()
+            // UMP requires a way to change ad consent only where it asked for consent (EEA and UK).
+            if (adsState.privacyOptionsRequired && activity != null) {
+                ListItem(
+                    modifier = Modifier.clickable { adsViewModel.showPrivacyOptionsForm(activity) },
+                    headlineContent = { Text(stringResource(R.string.settings_privacy_options)) },
+                    supportingContent = { Text(stringResource(R.string.settings_privacy_options_summary)) },
+                )
+                HorizontalDivider()
+            }
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_version)) },
                 supportingContent = { Text(versionName) },
