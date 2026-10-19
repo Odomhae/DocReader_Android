@@ -156,8 +156,8 @@ python samples/make-office-samples.py samples                                # D
 
 - `AdsController`(싱글턴)가 UMP 동의, `MobileAds` 초기화(백그라운드), 미리 로드, 오프닝 광고 판단을 맡는다. `MainActivity`가 새로 만들어질 때 `gatherConsent`를, 런처로 실행됐으면 `showAppOpenAdOnLaunch`를 부른다. 다른 모듈의 화면은 `AdsViewModel`을 통해 접근한다.
 - 오프닝 광고와 종료 팝업 광고는 SDK의 `AppOpenAdPreloader` / `BannerAdPreloader`가 미리 불러온다. 재시도와 만료 교체를 SDK가 하므로 직접 재시도하지 않는다.
-- 오프닝 광고는 런처 아이콘으로 액티비티가 새로 만들어질 때만 뜬다 (2026-10-19에 백그라운드 복귀 광고를 없앴다). `core-splashscreen`으로 스플래시를 최대 2초(`LAUNCH_AD_MAX_WAIT_MILLIS`) 유지하며 기다리고, 그 안에 로드되지 않으면 건너뛴다. 홈이 보인 뒤에는 띄우지 않는다. 다른 앱이 문서를 넘긴 실행은 런처 인텐트가 아니므로 대상이 아니다.
-- 제외 조건은 `shouldShowAppOpenAd`에 있다: 첫 실행 세션, 마지막 오프닝 광고 뒤 3시간 이내. 마지막 광고 시각은 프로세스가 죽어도 남도록 `LaunchHistoryRepository`(DataStore)에 벽시계 시각으로 저장한다. 시계를 뒤로 돌려 음수가 되면 광고를 막지 않는다.
+- 오프닝 광고는 런처 아이콘으로 액티비티가 새로 만들어질 때만 뜬다 (2026-10-19에 백그라운드 복귀 광고를 없앴다. 같은 날 대기를 2초에서 5초로, 간격을 3시간에서 1시간으로 바꿨다). `core-splashscreen`으로 스플래시를 최대 5초(`LAUNCH_AD_MAX_WAIT_MILLIS`) 유지하며 기다리고, 그 안에 로드되지 않으면 건너뛴다. 홈이 보인 뒤에는 띄우지 않는다. 다른 앱이 문서를 넘긴 실행은 런처 인텐트가 아니므로 대상이 아니다.
+- 제외 조건은 `shouldShowAppOpenAd`에 있다: 첫 실행 세션, 마지막 오프닝 광고 뒤 1시간 이내. 마지막 광고 시각은 프로세스가 죽어도 남도록 `LaunchHistoryRepository`(DataStore)에 벽시계 시각으로 저장한다. 시계를 뒤로 돌려 음수가 되면 광고를 막지 않는다.
 - 홈과 설정 아래 `BannerAd`는 로드되기 전에는 높이 0이다. 홈의 뒤로가기는 모두 `ExitDialog`를 연다. 광고가 없으면 같은 팝업이 광고 없이 뜬다.
 - 광고 ID는 `core/ads/src/main/res/values/ad_units.xml`(디버그, Google 테스트 ID)과 `src/release/res/values/ad_units.xml`(릴리스)에 있다. 릴리스 쪽에 테스트 ID가 남아 있으면 `bundleRelease`가 실패한다. `assembleRelease`는 통과한다.
 - 뷰어 모듈은 `:core:ads`에 의존하지 않고 WebView 네트워크 차단도 그대로다.

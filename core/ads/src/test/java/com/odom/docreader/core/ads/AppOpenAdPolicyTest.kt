@@ -28,8 +28,8 @@ class AppOpenAdPolicyTest {
     }
 
     @Test
-    fun theMinimumIntervalIsThreeHours() {
-        assertEquals(3 * 60 * 60 * 1000L, APP_OPEN_AD_MIN_INTERVAL_MILLIS)
+    fun theMinimumIntervalIsOneHour() {
+        assertEquals(60 * 60 * 1000L, APP_OPEN_AD_MIN_INTERVAL_MILLIS)
     }
 
     @Test

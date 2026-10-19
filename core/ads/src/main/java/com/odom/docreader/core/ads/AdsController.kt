@@ -208,6 +208,6 @@ class AdsController @Inject constructor(
         const val PRELOAD_BUFFER_SIZE = 1
 
         // Longest the splash screen stays up on a launcher start waiting for an app open ad.
-        const val LAUNCH_AD_MAX_WAIT_MILLIS = 2_000L
+        const val LAUNCH_AD_MAX_WAIT_MILLIS = 5_000L
     }
 }

@@ -1,7 +1,7 @@
 package com.odom.docreader.core.ads
 
 /** Shortest gap between two app open ads, so that opening the app several times a day is not punished. */
-internal const val APP_OPEN_AD_MIN_INTERVAL_MILLIS = 3 * 60 * 60 * 1000L
+internal const val APP_OPEN_AD_MIN_INTERVAL_MILLIS = 60 * 60 * 1000L
 
 /**
  * Whether to show an app open ad when the app is started from its icon.
