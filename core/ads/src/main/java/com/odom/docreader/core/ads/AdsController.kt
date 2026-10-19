@@ -2,11 +2,7 @@ package com.odom.docreader.core.ads
 
 import android.app.Activity
 import android.content.Context
-import android.os.SystemClock
 import android.util.Log
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.libraries.ads.mobile.sdk.MobileAds
 import com.google.android.libraries.ads.mobile.sdk.appopen.AppOpenAdEventCallback
 import com.google.android.libraries.ads.mobile.sdk.appopen.AppOpenAdPreloader
@@ -37,6 +33,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -51,7 +48,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 @Singleton
 class AdsController @Inject constructor(
     @ApplicationContext private val context: Context,
-    launchHistory: LaunchHistoryRepository,
+    private val launchHistory: LaunchHistoryRepository,
     @IoDispatcher ioDispatcher: CoroutineDispatcher,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
@@ -66,31 +63,22 @@ class AdsController @Inject constructor(
     private val exitDialogAdUnitId = context.getString(R.string.admob_exit_dialog_unit)
 
     // Null until the stored launch history has been read.
-    private val firstLaunchSession = MutableStateFlow<Boolean?>(null)
+    private val launchRecord = MutableStateFlow<LaunchRecord?>(null)
     private val appOpenAdAvailable = MutableStateFlow(false)
-    private val returnFromBackgroundPending = AtomicBoolean(false)
-    private val leftThroughTheApp = AtomicBoolean(false)
-    private val documentFromAnotherApp = AtomicBoolean(false)
-
-    @Volatile
-    private var lastAppOpenAdAt: Long? = null
 
     init {
         scope.launch {
-            try {
-                firstLaunchSession.value = launchHistory.recordLaunch()
+            launchRecord.value = try {
+                LaunchRecord(
+                    firstLaunchSession = launchHistory.recordLaunch(),
+                    lastAppOpenAdAt = launchHistory.lastAppOpenAdAt(),
+                )
             } catch (e: IOException) {
                 // Without the history the launch counts as the first, so no app open ad is shown.
                 Log.w(TAG, "Launch history unavailable", e)
+                LaunchRecord(firstLaunchSession = true, lastAppOpenAdAt = null)
             }
         }
-        // The singleton is created while MainActivity is injected, on the main thread that
-        // ProcessLifecycleOwner requires.
-        ProcessLifecycleOwner.get().lifecycle.addObserver(
-            LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_STOP) returnFromBackgroundPending.set(true)
-            },
-        )
     }
 
     /** Call on every launch. Shows the consent form only where and when UMP requires it. */
@@ -120,57 +108,20 @@ class AdsController @Inject constructor(
         }
     }
 
-    /** The app is about to open another app's screen: settings, the share sheet, "open with". */
-    fun onLeavingThroughTheApp() {
-        leftThroughTheApp.set(true)
-    }
-
-    /** Another app asked this app to open a document. */
-    fun onDocumentFromAnotherApp() {
-        documentFromAnotherApp.set(true)
-    }
-
     /**
      * For an activity created from the launcher icon. Waits for an app open ad only as long as the
      * caller keeps the splash screen up; once the home list is visible an ad would cover it.
      */
     suspend fun showAppOpenAdOnLaunch(activity: Activity) {
-        // This start is handled here, not as a return from the background.
-        returnFromBackgroundPending.set(false)
         if (!consentInformation.canRequestAds()) return
-        withTimeoutOrNull(LAUNCH_AD_MAX_WAIT_MILLIS) {
-            if (firstLaunchSession.first { it != null } == true) return@withTimeoutOrNull
-            appOpenAdAvailable.first { it }
-        }
-        showAppOpenAdIfEligible(activity)
-    }
-
-    /** Call from the activity's onResume. Shows an app open ad when the app came back from the background. */
-    fun showAppOpenAdOnReturn(activity: Activity) {
-        if (!returnFromBackgroundPending.getAndSet(false)) {
-            // Screens that only pause the app, such as the permission dialog, must not suppress the
-            // ad on a later, real return.
-            leftThroughTheApp.set(false)
-            documentFromAnotherApp.set(false)
-            return
-        }
-        showAppOpenAdIfEligible(activity)
-    }
-
-    /** Takes the preloaded exit dialog ad, or null if none is ready. The caller destroys it. */
-    fun pollExitDialogAd(): BannerAd? =
-        if (_state.value.adsReady) BannerAdPreloader.pollAd(exitDialogAdUnitId) else null
-
-    private fun showAppOpenAdIfEligible(activity: Activity) {
+        val record = withTimeoutOrNull(LAUNCH_AD_MAX_WAIT_MILLIS) {
+            val record = launchRecord.filterNotNull().first()
+            // Keep the splash screen up only when a loaded ad would actually be shown.
+            if (record.allowsAppOpenAd(adAvailable = true)) appOpenAdAvailable.first { it }
+            record
+        } ?: return
         val adAvailable = _state.value.adsReady && AppOpenAdPreloader.isAdAvailable(appOpenAdUnitId)
-        val show = shouldShowAppOpenAd(
-            firstLaunchSession = firstLaunchSession.value != false,
-            leftThroughTheApp = leftThroughTheApp.getAndSet(false),
-            documentFromAnotherApp = documentFromAnotherApp.getAndSet(false),
-            millisSinceLastAd = lastAppOpenAdAt?.let { SystemClock.elapsedRealtime() - it },
-            adAvailable = adAvailable,
-        )
-        if (!show || activity.isFinishing || activity.isDestroyed) return
+        if (!record.allowsAppOpenAd(adAvailable) || activity.isFinishing || activity.isDestroyed) return
         val ad = AppOpenAdPreloader.pollAd(appOpenAdUnitId) ?: return
         appOpenAdAvailable.value = AppOpenAdPreloader.isAdAvailable(appOpenAdUnitId)
         ad.adEventCallback = object : AppOpenAdEventCallback {
@@ -178,8 +129,28 @@ class AdsController @Inject constructor(
                 Log.w(TAG, "App open ad failed to show: ${fullScreenContentError.code}")
             }
         }
-        lastAppOpenAdAt = SystemClock.elapsedRealtime()
+        recordAppOpenAd(System.currentTimeMillis())
         ad.show(activity)
+    }
+
+    /** Takes the preloaded exit dialog ad, or null if none is ready. The caller destroys it. */
+    fun pollExitDialogAd(): BannerAd? =
+        if (_state.value.adsReady) BannerAdPreloader.pollAd(exitDialogAdUnitId) else null
+
+    private fun LaunchRecord.allowsAppOpenAd(adAvailable: Boolean): Boolean = shouldShowAppOpenAd(
+        firstLaunchSession = firstLaunchSession,
+        millisSinceLastAd = lastAppOpenAdAt?.let { System.currentTimeMillis() - it },
+        adAvailable = adAvailable,
+    )
+
+    private fun recordAppOpenAd(atMillis: Long) {
+        scope.launch {
+            try {
+                launchHistory.recordAppOpenAd(atMillis)
+            } catch (e: IOException) {
+                Log.w(TAG, "App open ad time not saved", e)
+            }
+        }
     }
 
     private fun onConsentUpdated() {
@@ -227,6 +198,8 @@ class AdsController @Inject constructor(
             Log.w(TAG, "Preload failed: ${adError.code}")
         }
     }
+
+    private data class LaunchRecord(val firstLaunchSession: Boolean, val lastAppOpenAdAt: Long?)
 
     private companion object {
         const val TAG = "Ads"

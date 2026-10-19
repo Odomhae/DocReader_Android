@@ -65,22 +65,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        // After onNewIntent, so a document handed over by another app is already known.
-        ads.showAppOpenAdOnReturn(this)
-    }
-
-    // Every screen of another app this activity opens (permission settings, share sheet, "open with")
-    // goes through here, including Compose's activity result launchers.
-    @Deprecated("Overridden only to observe launches; callers use the activity result APIs.")
-    override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
-        val target = intent.component?.packageName ?: intent.`package`
-        if (target != packageName) ads.onLeavingThroughTheApp()
-        @Suppress("DEPRECATION")
-        super.startActivityForResult(intent, requestCode, options)
-    }
-
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -92,7 +76,6 @@ class MainActivity : FragmentActivity() {
 
     private fun handleViewIntent(intent: Intent) {
         if (intent.action != Intent.ACTION_VIEW) return
-        ads.onDocumentFromAnotherApp()
         val uri = intent.data ?: return
         viewModel.onViewIntent(
             uri = uri.toString(),
