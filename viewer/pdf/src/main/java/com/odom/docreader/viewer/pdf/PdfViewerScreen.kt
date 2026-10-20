@@ -2,7 +2,9 @@ package com.odom.docreader.viewer.pdf
 
 import android.net.Uri
 import android.os.Build
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -117,7 +119,9 @@ internal fun PdfViewerScaffold(
             }
         },
     ) { innerPadding ->
-        content(Modifier.fillMaxSize().padding(innerPadding))
+        // androidx.pdf's search bar sits at the bottom of the fragment and its own keyboard handling
+        // never sees the insets Compose consumes, so the content area itself shrinks above the keyboard.
+        content(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding).imePadding())
     }
 }
 
