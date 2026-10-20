@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.odom.docreader.core.ads.AdsController
@@ -28,6 +29,8 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var ads: AdsController
 
+    private var homeShown = false
+
     // The app is light-only. Without this, a device in dark mode would still pick night
     // resources in androidx.pdf's views and light system bar icons in enableEdgeToEdge().
     override fun attachBaseContext(newBase: Context) {
@@ -36,7 +39,7 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // On re-creation the navigation back stack already holds the document that was opened.
@@ -44,12 +47,11 @@ class MainActivity : FragmentActivity() {
             handleViewIntent(intent)
             ads.gatherConsent(this)
             if (intent.isLauncherLaunch()) {
-                // An app open ad on a cold start may only cover the splash screen, never the home list.
-                var waitingForAppOpenAd = true
-                splashScreen.setKeepOnScreenCondition { waitingForAppOpenAd }
                 lifecycleScope.launch {
-                    ads.showAppOpenAdOnLaunch(this@MainActivity)
-                    waitingForAppOpenAd = false
+                    // A late ad must not cover a document or appear while the app is in the background.
+                    ads.showAppOpenAdOnLaunch(this@MainActivity) {
+                        homeShown && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                    }
                 }
             }
         }
@@ -60,6 +62,7 @@ class MainActivity : FragmentActivity() {
                 DocReaderNavHost(
                     incomingDocument = incomingDocument,
                     onIncomingDocumentHandled = viewModel::onIncomingDocumentHandled,
+                    onHomeShownChanged = { homeShown = it },
                 )
             }
         }

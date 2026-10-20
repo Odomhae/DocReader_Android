@@ -2,9 +2,12 @@ package com.odom.docreader.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.odom.docreader.IncomingDocument
@@ -17,11 +20,16 @@ import com.odom.docreader.feature.settings.SettingsScreen
 fun DocReaderNavHost(
     incomingDocument: IncomingDocument?,
     onIncomingDocumentHandled: () -> Unit,
+    onHomeShownChanged: (Boolean) -> Unit,
     // Scoped to the activity, so every viewer opens with the settings already loaded.
     readingSettingsViewModel: ReadingSettingsViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
     val onBack: () -> Unit = { navController.popBackStack() }
+    val currentEntry by navController.currentBackStackEntryAsState()
+    val homeShown = currentEntry?.destination?.hasRoute<HomeRoute>() == true
+
+    LaunchedEffect(homeShown) { onHomeShownChanged(homeShown) }
 
     LaunchedEffect(incomingDocument) {
         when (incomingDocument) {

@@ -53,7 +53,7 @@ class AdsController @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val consentInformation: ConsentInformation = UserMessagingPlatform.getConsentInformation(context)
-    private val initializationStarted = AtomicBoolean(false)
+    private val initializationStarted = Atomi   cBoolean(false)
 
     private val _state = MutableStateFlow(AdsState())
     val state: StateFlow<AdsState> = _state.asStateFlow()
@@ -109,19 +109,20 @@ class AdsController @Inject constructor(
     }
 
     /**
-     * For an activity created from the launcher icon. Waits for an app open ad only as long as the
-     * caller keeps the splash screen up; once the home list is visible an ad would cover it.
+     * For an activity created from the launcher icon. The app is already usable while this waits, so
+     * a late ad is shown only if [canShow] still holds: AdMob forbids ads that pop up over content
+     * the user is working with.
      */
-    suspend fun showAppOpenAdOnLaunch(activity: Activity) {
+    suspend fun showAppOpenAdOnLaunch(activity: Activity, canShow: () -> Boolean) {
         if (!consentInformation.canRequestAds()) return
         val record = withTimeoutOrNull(LAUNCH_AD_MAX_WAIT_MILLIS) {
             val record = launchRecord.filterNotNull().first()
-            // Keep the splash screen up only when a loaded ad would actually be shown.
+            // Wait for the ad only when a loaded ad would actually be shown.
             if (record.allowsAppOpenAd(adAvailable = true)) appOpenAdAvailable.first { it }
             record
         } ?: return
         val adAvailable = _state.value.adsReady && AppOpenAdPreloader.isAdAvailable(appOpenAdUnitId)
-        if (!record.allowsAppOpenAd(adAvailable) || activity.isFinishing || activity.isDestroyed) return
+        if (!record.allowsAppOpenAd(adAvailable) || !canShow() || activity.isFinishing || activity.isDestroyed) return
         val ad = AppOpenAdPreloader.pollAd(appOpenAdUnitId) ?: return
         appOpenAdAvailable.value = AppOpenAdPreloader.isAdAvailable(appOpenAdUnitId)
         ad.adEventCallback = object : AppOpenAdEventCallback {
@@ -207,7 +208,7 @@ class AdsController @Inject constructor(
         // Each placement shows at most one ad at a time.
         const val PRELOAD_BUFFER_SIZE = 1
 
-        // Longest the splash screen stays up on a launcher start waiting for an app open ad.
+        // Longest a launcher start waits for an app open ad; a later ad would surprise the user.
         const val LAUNCH_AD_MAX_WAIT_MILLIS = 5_000L
     }
 }
