@@ -53,7 +53,7 @@ class AdsController @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val consentInformation: ConsentInformation = UserMessagingPlatform.getConsentInformation(context)
-    private val initializationStarted = Atomi   cBoolean(false)
+    private val initializationStarted = AtomicBoolean(false)
 
     private val _state = MutableStateFlow(AdsState())
     val state: StateFlow<AdsState> = _state.asStateFlow()
