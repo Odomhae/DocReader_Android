@@ -2,8 +2,8 @@
 <!-- Real IDs from the AdMob console go here. Until then these are still the test IDs, and
      :app's bundleRelease refuses to build so that a test-ID build cannot reach Play. -->
 <resources>
-    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
-    <string name="admob_app_open_unit" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
-    <string name="admob_banner_unit" translatable="false">ca-app-pub-3940256099942544/9214589741</string>
-    <string name="admob_exit_dialog_unit" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-6729344454320392~2073722818</string>
+    <string name="admob_app_open_unit" translatable="false">ca-app-pub-6729344454320392/1446951132</string>
+    <string name="admob_banner_unit" translatable="false">ca-app-pub-6729344454320392/6978479410</string>
+    <string name="admob_exit_dialog_unit" translatable="false">ca-app-pub-6729344454320392/1833963941</string>
 </resources>
